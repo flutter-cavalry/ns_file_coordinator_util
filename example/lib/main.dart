@@ -9,7 +9,6 @@ import 'dart:async';
 
 import 'package:ns_file_coordinator_util/ns_file_coordinator_util.dart';
 import 'package:tmp_path/tmp_path.dart';
-import 'package:path/path.dart' as p;
 
 void main() {
   runApp(const MyApp());
