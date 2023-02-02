@@ -1,0 +1,34 @@
+PODS:
+  - accessing_security_scoped_resource (0.0.1):
+    - FlutterMacOS
+  - FlutterMacOS (1.0.0)
+  - macos_file_picker (0.0.1):
+    - FlutterMacOS
+  - ns_file_coordinator_util (0.0.1):
+    - FlutterMacOS
+
+DEPENDENCIES:
+  - accessing_security_scoped_resource (from `Flutter/ephemeral/.symlinks/plugins/accessing_security_scoped_resource/macos`)
+  - FlutterMacOS (from `Flutter/ephemeral`)
+  - macos_file_picker (from `Flutter/ephemeral/.symlinks/plugins/macos_file_picker/macos`)
+  - ns_file_coordinator_util (from `Flutter/ephemeral/.symlinks/plugins/ns_file_coordinator_util/macos`)
+
+EXTERNAL SOURCES:
+  accessing_security_scoped_resource:
+    :path: Flutter/ephemeral/.symlinks/plugins/accessing_security_scoped_resource/macos
+  FlutterMacOS:
+    :path: Flutter/ephemeral
+  macos_file_picker:
+    :path: Flutter/ephemeral/.symlinks/plugins/macos_file_picker/macos
+  ns_file_coordinator_util:
+    :path: Flutter/ephemeral/.symlinks/plugins/ns_file_coordinator_util/macos
+
+SPEC CHECKSUMS:
+  accessing_security_scoped_resource: 740a366aa2e74ba6e54a20dd27c1d40a57f7e2c1
+  FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
+  macos_file_picker: 9ae907f5f69a352afc8fb44e8a80bb180f9267d5
+  ns_file_coordinator_util: c87028a4bd3e198777025c1ffb0ca7bc3f691ba9
+
+PODFILE CHECKSUM: 353c8bcc5d5b0994e508d035b5431cfe18c1dea7
+
+COCOAPODS: 1.11.3
