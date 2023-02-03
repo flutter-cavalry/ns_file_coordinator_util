@@ -9,6 +9,7 @@ import 'dart:async';
 
 import 'package:ns_file_coordinator_util/ns_file_coordinator_util.dart';
 import 'package:tmp_path/tmp_path.dart';
+import 'package:path/path.dart' as p;
 
 void main() {
   runApp(const MyApp());
@@ -96,7 +97,17 @@ class _MyHomeState extends State<MyHome> {
         controller: _fileTextController,
       ),
       _sep(),
-      OutlinedButton(onPressed: _download, child: const Text('Download'))
+      OutlinedButton(
+          onPressed: _download, child: const Text('Read/download file')),
+      _sep(),
+      OutlinedButton(onPressed: _list, child: const Text('List contents')),
+      _sep(),
+      OutlinedButton(onPressed: _delete, child: const Text('Delete')),
+      _sep(),
+      OutlinedButton(onPressed: _move, child: const Text('Move')),
+      _sep(),
+      OutlinedButton(onPressed: _writeFile, child: const Text('Write file')),
+      _sep(),
     ];
   }
 
@@ -132,21 +143,119 @@ class _MyHomeState extends State<MyHome> {
 
   Future<void> _download() async {
     try {
+      var dir = _icloudFolder;
       var fileRelPath = _fileTextController.text;
-      if (fileRelPath.isEmpty) {
+      if (fileRelPath.isEmpty || dir == null) {
         return;
       }
-      var fileAbsPath = p.join(_icloudFolder!, fileRelPath);
+      var fileAbsPath = p.join(dir, fileRelPath);
       var destPath = tmpPath();
 
       setState(() {
-        _output = 'Reading $fileAbsPath';
+        _output = 'Reading/downloading $dir';
       });
       await _plugin.readFile(fileAbsPath, destPath);
 
       var length = await File(destPath).length();
       setState(() {
         _output = 'File written to $destPath with $length bytes';
+      });
+    } catch (err) {
+      setState(() {
+        _output = '';
+      });
+      await _showErrorAlert(context, err.toString());
+    }
+  }
+
+  Future<void> _list() async {
+    try {
+      var dir = _icloudFolder;
+      if (dir == null) {
+        return;
+      }
+      setState(() {
+        _output = 'Listing contents of $dir';
+      });
+      var contents = await _plugin.listContents(dir);
+      setState(() {
+        _output = '--- Contents ---\n${contents.join('\n')}';
+      });
+    } catch (err) {
+      setState(() {
+        _output = '';
+      });
+      await _showErrorAlert(context, err.toString());
+    }
+  }
+
+  Future<void> _delete() async {
+    try {
+      var dir = _icloudFolder;
+      var fileRelPath = _fileTextController.text;
+      if (fileRelPath.isEmpty || dir == null) {
+        return;
+      }
+      var fileAbsPath = p.join(dir, fileRelPath);
+
+      setState(() {
+        _output = 'Deleting $dir';
+      });
+      await _plugin.delete(fileAbsPath);
+      setState(() {
+        _output = 'Deleted';
+      });
+    } catch (err) {
+      setState(() {
+        _output = '';
+      });
+      await _showErrorAlert(context, err.toString());
+    }
+  }
+
+  Future<void> _move() async {
+    try {
+      var dir = _icloudFolder;
+      var fileRelPath = _fileTextController.text;
+      if (fileRelPath.isEmpty || dir == null) {
+        return;
+      }
+      var fileAbsPath = p.join(dir, fileRelPath);
+      var newFileAbsPath = p.join(p.dirname(fileAbsPath), 'newName');
+
+      setState(() {
+        _output = 'Rename $fileAbsPath to $newFileAbsPath';
+      });
+      await _plugin.move(fileAbsPath, newFileAbsPath);
+      setState(() {
+        _output = 'Renamed';
+      });
+    } catch (err) {
+      setState(() {
+        _output = '';
+      });
+      await _showErrorAlert(context, err.toString());
+    }
+  }
+
+  Future<void> _writeFile() async {
+    try {
+      var dir = _icloudFolder;
+      var fileRelPath = _fileTextController.text;
+      if (fileRelPath.isEmpty || dir == null) {
+        return;
+      }
+      var fileAbsPath = p.join(dir, fileRelPath);
+
+      var tmpFile = tmpPath();
+      await File(tmpFile).writeAsString('hello');
+
+      setState(() {
+        _output = 'Writing to $fileAbsPath';
+      });
+      await _plugin.writeFile(tmpFile, fileAbsPath);
+      setState(() {
+        _output = 'Succeeded';
       });
     } catch (err) {
       setState(() {

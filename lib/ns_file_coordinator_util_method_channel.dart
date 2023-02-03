@@ -14,4 +14,32 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
     await methodChannel
         .invokeMethod<void>('readFile', {'src': src, 'dest': dest});
   }
+
+  @override
+  Future<List<NsFileCoordinatorEntity>> listContents(String src) async {
+    var entityMaps = await methodChannel
+        .invokeListMethod<Map<dynamic, dynamic>>('listContents', {
+      'src': src,
+    });
+    if (entityMaps == null) {
+      return [];
+    }
+    return entityMaps.map((e) => NsFileCoordinatorEntity.fromJson(e)).toList();
+  }
+
+  @override
+  Future<void> delete(String src) async {
+    await methodChannel.invokeMethod<void>('delete', {'src': src});
+  }
+
+  @override
+  Future<void> move(String src, String dest) async {
+    await methodChannel.invokeMethod<void>('move', {'src': src, 'dest': dest});
+  }
+
+  @override
+  Future<void> writeFile(String src, String dest) async {
+    await methodChannel
+        .invokeMethod<void>('writeFile', {'src': src, 'dest': dest});
+  }
 }

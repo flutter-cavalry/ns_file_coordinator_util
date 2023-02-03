@@ -7,6 +7,25 @@ Helper functions for `NSFileCoordinator` (iOS/macOS only).
 NOTE: this plugin doesn't automatically call `startAccessingSecurityScopedResource`. You can call it with [accessing_security_scoped_resource](https://pub.dev/packages/accessing_security_scoped_resource);
 
 ```dart
-/// Calls [coordinate(readingItemAt:options:error:byAccessor:)] and copies [src] to [dest].
+/// Reads an iCloud [src] file and copies it to [dest].
 Future<void> readFile(String src, String dest);
+
+/// Gets the contents of an iCloud [src] directory and returns an array of [NsFileCoordinatorEntity].
+Future<List<NsFileCoordinatorEntity>> listContents(String src);
+
+/// Deletes the given iCloud path.
+Future<void> delete(String src);
+
+/// Moves [src] path to [dest].
+Future<void> move(String src, String dest);
+
+/// Copies [src] file to iCloud [dest].
+Future<void> writeFile(String src, String dest);
+```
+
+Example:
+
+```dart
+final plugin = NsFileCoordinatorUtil();
+await plugin = readFile(src, dest);
 ```
