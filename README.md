@@ -4,7 +4,7 @@ Helper functions for `NSFileCoordinator` (iOS/macOS only).
 
 ## Usage
 
-NOTE: this plugin doesn't automatically call `startAccessingSecurityScopedResource`. You can call it with [accessing_security_scoped_resource](https://pub.dev/packages/accessing_security_scoped_resource);
+NOTE: this plugin doesn't automatically call `startAccessingSecurityScopedResource`. You can call it yourself with [accessing_security_scoped_resource](https://pub.dev/packages/accessing_security_scoped_resource);
 
 ```dart
 /// Reads an iCloud [src] file and copies it to [dest].
@@ -27,5 +27,5 @@ Example:
 
 ```dart
 final plugin = NsFileCoordinatorUtil();
-await plugin = readFile(src, dest);
+await plugin.readFile(src, dest);
 ```
