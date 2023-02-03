@@ -10,17 +10,20 @@ NOTE: this plugin doesn't automatically call `startAccessingSecurityScopedResour
 /// Reads an iCloud [src] file and copies it to [dest].
 Future<void> readFile(String src, String dest);
 
-/// Gets the contents of an iCloud [src] directory and returns an array of [NsFileCoordinatorEntity].
-Future<List<NsFileCoordinatorEntity>> listContents(String src);
+/// Gets the contents of an iCloud directory [path] and returns an array of [NsFileCoordinatorEntity].
+Future<List<NsFileCoordinatorEntity>> listContents(String path);
 
-/// Deletes the given iCloud path.
-Future<void> delete(String src);
+/// Deletes the given iCloud [path].
+Future<void> delete(String path) async;
 
 /// Moves [src] path to [dest].
 Future<void> move(String src, String dest);
 
 /// Copies [src] file to iCloud [dest].
 Future<void> writeFile(String src, String dest);
+
+/// Checks if the given iCloud [path] exists.
+Future<bool> exists(String path) async;
 ```
 
 Example:

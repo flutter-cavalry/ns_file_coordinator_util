@@ -48,11 +48,11 @@ abstract class NsFileCoordinatorUtilPlatform extends PlatformInterface {
     throw UnimplementedError('readFile() has not been implemented.');
   }
 
-  Future<List<NsFileCoordinatorEntity>> listContents(String src) async {
+  Future<List<NsFileCoordinatorEntity>> listContents(String path) async {
     throw UnimplementedError('listContents() has not been implemented.');
   }
 
-  Future<void> delete(String src) async {
+  Future<void> delete(String path) async {
     throw UnimplementedError('delete() has not been implemented.');
   }
 
@@ -62,5 +62,9 @@ abstract class NsFileCoordinatorUtilPlatform extends PlatformInterface {
 
   Future<void> writeFile(String src, String dest) {
     throw UnimplementedError('writeFile() has not been implemented.');
+  }
+
+  Future<bool> exists(String path) async {
+    throw UnimplementedError('exists() has not been implemented.');
   }
 }

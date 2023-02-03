@@ -16,10 +16,10 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
   }
 
   @override
-  Future<List<NsFileCoordinatorEntity>> listContents(String src) async {
+  Future<List<NsFileCoordinatorEntity>> listContents(String path) async {
     var entityMaps = await methodChannel
         .invokeListMethod<Map<dynamic, dynamic>>('listContents', {
-      'src': src,
+      'src': path,
     });
     if (entityMaps == null) {
       return [];
@@ -28,8 +28,8 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
   }
 
   @override
-  Future<void> delete(String src) async {
-    await methodChannel.invokeMethod<void>('delete', {'src': src});
+  Future<void> delete(String path) async {
+    await methodChannel.invokeMethod<void>('delete', {'src': path});
   }
 
   @override
@@ -41,5 +41,11 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
   Future<void> writeFile(String src, String dest) async {
     await methodChannel
         .invokeMethod<void>('writeFile', {'src': src, 'dest': dest});
+  }
+
+  @override
+  Future<bool> exists(String path) async {
+    return await methodChannel.invokeMethod<bool>('exists', {'src': path}) ??
+        false;
   }
 }

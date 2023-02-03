@@ -108,6 +108,8 @@ class _MyHomeState extends State<MyHome> {
       _sep(),
       OutlinedButton(onPressed: _writeFile, child: const Text('Write file')),
       _sep(),
+      OutlinedButton(onPressed: _exists, child: const Text('Check existence')),
+      _sep(),
     ];
   }
 
@@ -256,6 +258,30 @@ class _MyHomeState extends State<MyHome> {
       await _plugin.writeFile(tmpFile, fileAbsPath);
       setState(() {
         _output = 'Succeeded';
+      });
+    } catch (err) {
+      setState(() {
+        _output = '';
+      });
+      await _showErrorAlert(context, err.toString());
+    }
+  }
+
+  Future<void> _exists() async {
+    try {
+      var dir = _icloudFolder;
+      var fileRelPath = _fileTextController.text;
+      if (fileRelPath.isEmpty || dir == null) {
+        return;
+      }
+      var fileAbsPath = p.join(dir, fileRelPath);
+
+      setState(() {
+        _output = 'Checking if $fileAbsPath exists';
+      });
+      var res = await _plugin.exists(fileAbsPath);
+      setState(() {
+        _output = 'Result: $res';
       });
     } catch (err) {
       setState(() {

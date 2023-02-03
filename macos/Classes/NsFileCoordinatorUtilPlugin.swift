@@ -150,6 +150,17 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         result(FlutterError(code: "NSFileCoordinatorError", message: error.localizedDescription, details: nil))
       }
       
+      
+    case "exists":
+      // Arguments are enforced on dart side.
+      let src = args["src"] as! String
+      let srcURL = URL(fileURLWithPath: src)
+      
+      let reachable = try? srcURL.checkPromisedItemIsReachable()
+      DispatchQueue.main.async {
+        result(reachable)
+      }
+      
     default:
       result(FlutterMethodNotImplemented)
     }
