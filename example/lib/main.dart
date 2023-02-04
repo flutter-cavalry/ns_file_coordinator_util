@@ -59,18 +59,26 @@ class _MyHomeState extends State<MyHome> {
       appBar: AppBar(
         title: const Text('Plugin example app'),
       ),
-      body: Container(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            const Text('Click the + to select an iCloud folder first'),
-            _sep(),
-            if (_icloudFolder != null) Text('iCloud folder: $_icloudFolder'),
-            _sep(),
-            ..._renderButtons(),
-            _sep(),
-            Text(_output)
-          ],
+      body: SingleChildScrollView(
+        child: GestureDetector(
+          onTap: () {
+            FocusScope.of(context).requestFocus(FocusNode());
+          },
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                const Text('Click the + to select an iCloud folder first'),
+                _sep(),
+                if (_icloudFolder != null)
+                  Text('iCloud folder: $_icloudFolder'),
+                _sep(),
+                ..._renderButtons(),
+                _sep(),
+                Text(_output)
+              ],
+            ),
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
