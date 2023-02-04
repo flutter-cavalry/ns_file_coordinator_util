@@ -30,4 +30,9 @@ class NsFileCoordinatorUtil {
   Future<bool> exists(String path) async {
     return NsFileCoordinatorUtilPlatform.instance.exists(path);
   }
+
+  /// Creates a directory [path] like [mkdir -p].
+  Future<void> mkdir(String path) async {
+    return NsFileCoordinatorUtilPlatform.instance.mkdir(path);
+  }
 }

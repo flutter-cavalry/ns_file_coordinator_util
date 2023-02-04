@@ -110,6 +110,8 @@ class _MyHomeState extends State<MyHome> {
       _sep(),
       OutlinedButton(onPressed: _exists, child: const Text('Check existence')),
       _sep(),
+      OutlinedButton(onPressed: _mkdir, child: const Text('Mkdir')),
+      _sep(),
     ];
   }
 
@@ -280,6 +282,30 @@ class _MyHomeState extends State<MyHome> {
       var res = await _plugin.exists(fileAbsPath);
       setState(() {
         _output = 'Result: $res';
+      });
+    } catch (err) {
+      setState(() {
+        _output = '';
+      });
+      await _showErrorAlert(context, err.toString());
+    }
+  }
+
+  Future<void> _mkdir() async {
+    try {
+      var dir = _icloudFolder;
+      var fileRelPath = _fileTextController.text;
+      if (fileRelPath.isEmpty || dir == null) {
+        return;
+      }
+      var fileAbsPath = p.join(dir, fileRelPath);
+
+      setState(() {
+        _output = 'Creating directory $fileAbsPath';
+      });
+      await _plugin.mkdir(fileAbsPath);
+      setState(() {
+        _output = 'Created';
       });
     } catch (err) {
       setState(() {

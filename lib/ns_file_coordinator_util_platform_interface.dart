@@ -67,4 +67,8 @@ abstract class NsFileCoordinatorUtilPlatform extends PlatformInterface {
   Future<bool> exists(String path) async {
     throw UnimplementedError('exists() has not been implemented.');
   }
+
+  Future<void> mkdir(String path) async {
+    throw UnimplementedError('mkdir() has not been implemented.');
+  }
 }

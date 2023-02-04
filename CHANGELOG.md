@@ -1,3 +1,7 @@
+## 0.4.0
+
+- Added `mkdir` function.
+
 ## 0.3.0
 
 - Rename `copyFile` to `copy`.

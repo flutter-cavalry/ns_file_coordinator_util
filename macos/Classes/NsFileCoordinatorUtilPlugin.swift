@@ -162,6 +162,29 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         result(reachable)
       }
       
+    case "mkdir":
+      // Arguments are enforced on dart side.
+      let src = args["src"] as! String
+      
+      let srcURL = URL(fileURLWithPath: src)
+      
+      var error: NSError? = nil
+      NSFileCoordinator().coordinate(writingItemAt: srcURL, error: &error) { destURL in
+        do {
+          try FileManager.default.createDirectory(at: srcURL, withIntermediateDirectories: true)
+          DispatchQueue.main.async {
+            result(nil)
+          }
+        } catch {
+          DispatchQueue.main.async {
+            result(FlutterError(code: "MkdirError", message: error.localizedDescription, details: nil))
+          }
+        }
+      }
+      if let error = error {
+        result(FlutterError(code: "NSFileCoordinatorError", message: error.localizedDescription, details: nil))
+      }
+      
     default:
       result(FlutterMethodNotImplemented)
     }

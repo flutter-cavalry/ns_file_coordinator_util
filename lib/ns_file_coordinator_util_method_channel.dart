@@ -47,4 +47,9 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
     return await methodChannel.invokeMethod<bool>('exists', {'src': path}) ??
         false;
   }
+
+  @override
+  Future<void> mkdir(String path) async {
+    await methodChannel.invokeMethod<void>('mkdir', {'src': path});
+  }
 }

@@ -24,6 +24,9 @@ Future<void> copy(String src, String dest);
 
 /// Checks if the given iCloud [path] exists.
 Future<bool> exists(String path) async;
+
+/// Creates a directory [path] like [mkdir -p].
+Future<void> mkdir(String path) async;
 ```
 
 Example:
