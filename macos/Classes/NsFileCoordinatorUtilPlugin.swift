@@ -125,7 +125,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         result(FlutterError(code: "NSFileCoordinatorError", message: error.localizedDescription, details: nil))
       }
       
-    case "writeFile":
+    case "copy":
       // Arguments are enforced on dart side.
       let src = args["src"] as! String
       let dest = args["dest"] as! String
@@ -143,7 +143,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           }
         } catch {
           DispatchQueue.main.async {
-            result(FlutterError(code: "WriteFileError", message: error.localizedDescription, details: nil))
+            result(FlutterError(code: "CopyFileError", message: error.localizedDescription, details: nil))
           }
         }
       }

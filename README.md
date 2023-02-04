@@ -19,8 +19,8 @@ Future<void> delete(String path) async;
 /// Moves [src] path to [dest].
 Future<void> move(String src, String dest);
 
-/// Copies [src] file to iCloud [dest].
-Future<void> writeFile(String src, String dest);
+/// Copies [src] path to iCloud [dest].
+Future<void> copy(String src, String dest);
 
 /// Checks if the given iCloud [path] exists.
 Future<bool> exists(String path) async;

@@ -1,3 +1,7 @@
+## 0.3.0
+
+- Rename `copyFile` to `copy`.
+
 ## 0.2.1
 
 - Create base directories before writing destination file.

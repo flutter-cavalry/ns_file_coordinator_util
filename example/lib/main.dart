@@ -106,7 +106,7 @@ class _MyHomeState extends State<MyHome> {
       _sep(),
       OutlinedButton(onPressed: _move, child: const Text('Move')),
       _sep(),
-      OutlinedButton(onPressed: _writeFile, child: const Text('Write file')),
+      OutlinedButton(onPressed: _copyPath, child: const Text('Copy path')),
       _sep(),
       OutlinedButton(onPressed: _exists, child: const Text('Check existence')),
       _sep(),
@@ -240,7 +240,7 @@ class _MyHomeState extends State<MyHome> {
     }
   }
 
-  Future<void> _writeFile() async {
+  Future<void> _copyPath() async {
     try {
       var dir = _icloudFolder;
       var fileRelPath = _fileTextController.text;
@@ -248,14 +248,12 @@ class _MyHomeState extends State<MyHome> {
         return;
       }
       var fileAbsPath = p.join(dir, fileRelPath);
-
-      var tmpFile = tmpPath();
-      await File(tmpFile).writeAsString('hello');
+      var tmpDir = await _createTempDir();
 
       setState(() {
         _output = 'Writing to $fileAbsPath';
       });
-      await _plugin.writeFile(tmpFile, fileAbsPath);
+      await _plugin.copy(tmpDir, fileAbsPath);
       setState(() {
         _output = 'Succeeded';
       });
@@ -305,5 +303,13 @@ class _MyHomeState extends State<MyHome> {
         ],
       ),
     );
+  }
+
+  Future<String> _createTempDir() async {
+    var tmpDir = tmpPath();
+    await Directory(tmpDir).create();
+    await File(p.join(tmpDir, '1.txt')).writeAsString('file 1');
+    await File(p.join(tmpDir, '2.txt')).writeAsString('file 2');
+    return tmpDir;
   }
 }

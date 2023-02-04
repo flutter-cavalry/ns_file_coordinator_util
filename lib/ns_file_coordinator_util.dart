@@ -21,9 +21,9 @@ class NsFileCoordinatorUtil {
     return NsFileCoordinatorUtilPlatform.instance.move(src, dest);
   }
 
-  /// Copies [src] file to iCloud [dest].
-  Future<void> writeFile(String src, String dest) {
-    return NsFileCoordinatorUtilPlatform.instance.writeFile(src, dest);
+  /// Copies [src] path to iCloud [dest].
+  Future<void> copy(String src, String dest) {
+    return NsFileCoordinatorUtilPlatform.instance.copy(src, dest);
   }
 
   /// Checks if the given iCloud [path] exists.
