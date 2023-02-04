@@ -136,6 +136,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
       var error: NSError? = nil
       NSFileCoordinator().coordinate(writingItemAt: destURL, error: &error) { destURL in
         do {
+          try FileManager.default.createDirectory(at: destURL.deletingLastPathComponent(), withIntermediateDirectories: true)
           try FileManager.default.copyItem(at: srcURL, to: destURL)
           DispatchQueue.main.async {
             result(nil)

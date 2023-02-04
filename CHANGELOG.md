@@ -1,3 +1,7 @@
+## 0.2.1
+
+- Create base directories before writing destination file.
+
 ## 0.2.0
 
 - Added `exists` function.

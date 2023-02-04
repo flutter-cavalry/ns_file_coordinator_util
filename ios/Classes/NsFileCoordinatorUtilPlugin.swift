@@ -136,6 +136,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
       var error: NSError? = nil
       NSFileCoordinator().coordinate(writingItemAt: destURL, error: &error) { destURL in
         do {
+          try FileManager.default.createDirectory(at: destURL.deletingLastPathComponent(), withIntermediateDirectories: true)
           try FileManager.default.copyItem(at: srcURL, to: destURL)
           DispatchQueue.main.async {
             result(nil)
@@ -148,6 +149,17 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
       }
       if let error = error {
         result(FlutterError(code: "NSFileCoordinatorError", message: error.localizedDescription, details: nil))
+      }
+      
+      
+    case "exists":
+      // Arguments are enforced on dart side.
+      let src = args["src"] as! String
+      let srcURL = URL(fileURLWithPath: src)
+      
+      let reachable = try? srcURL.checkPromisedItemIsReachable()
+      DispatchQueue.main.async {
+        result(reachable)
       }
       
     default:
