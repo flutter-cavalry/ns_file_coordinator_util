@@ -1,3 +1,7 @@
+## 0.6.0
+
+- Added `isEmptyDirectory`.
+
 ## 0.5.0
 
 - Moved work off the main thread.

@@ -27,6 +27,9 @@ Future<bool> exists(String path) async;
 
 /// Creates a directory [path] like [mkdir -p].
 Future<void> mkdir(String path) async;
+
+/// Checks if the directory [path] is empty.
+Future<void> isEmptyDirectory(String path);
 ```
 
 Example:

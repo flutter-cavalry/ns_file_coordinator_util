@@ -206,6 +206,32 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           }
         }
         
+      case "isEmptyDirectory":
+        // Arguments are enforced on dart side.
+        let src = args["src"] as! String
+        
+        let srcURL = URL(fileURLWithPath: src)
+        
+        var error: NSError? = nil
+        NSFileCoordinator().coordinate(readingItemAt: srcURL, error: &error) { (url) in
+          do {
+            let contentURLs = try FileManager.default.contentsOfDirectory(at: srcURL, includingPropertiesForKeys: [])
+            let isEmpty = contentURLs.count == 0
+            DispatchQueue.main.async {
+              result(isEmpty)
+            }
+          } catch {
+            DispatchQueue.main.async {
+              result(FlutterError(code: "ListContentError", message: error.localizedDescription, details: nil))
+            }
+          }
+        }
+        if let error = error {
+          DispatchQueue.main.async {
+            result(FlutterError(code: "NSFileCoordinatorError", message: error.localizedDescription, details: nil))
+          }
+        }
+        
       default:
         DispatchQueue.main.async {
           result(FlutterMethodNotImplemented)
