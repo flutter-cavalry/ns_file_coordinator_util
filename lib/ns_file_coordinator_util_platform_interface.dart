@@ -72,7 +72,7 @@ abstract class NsFileCoordinatorUtilPlatform extends PlatformInterface {
     throw UnimplementedError('mkdir() has not been implemented.');
   }
 
-  Future<void> isEmptyDirectory(String path) async {
+  Future<bool> isEmptyDirectory(String path) async {
     throw UnimplementedError('isEmptyDirectory() has not been implemented.');
   }
 }

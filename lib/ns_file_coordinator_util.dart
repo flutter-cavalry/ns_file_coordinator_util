@@ -37,7 +37,7 @@ class NsFileCoordinatorUtil {
   }
 
   /// Checks if the directory [path] is empty.
-  Future<void> isEmptyDirectory(String path) async {
+  Future<bool> isEmptyDirectory(String path) async {
     return NsFileCoordinatorUtilPlatform.instance.isEmptyDirectory(path);
   }
 }

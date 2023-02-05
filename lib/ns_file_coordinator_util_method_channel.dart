@@ -54,7 +54,9 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
   }
 
   @override
-  Future<void> isEmptyDirectory(String path) async {
-    await methodChannel.invokeMethod<bool>('isEmptyDirectory', {'src': path});
+  Future<bool> isEmptyDirectory(String path) async {
+    return await methodChannel
+            .invokeMethod<bool>('isEmptyDirectory', {'src': path}) ??
+        false;
   }
 }
