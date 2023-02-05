@@ -1,3 +1,7 @@
+## 0.5.0
+
+- Moved work off the main thread.
+
 ## 0.4.0
 
 - Added `mkdir` function.
