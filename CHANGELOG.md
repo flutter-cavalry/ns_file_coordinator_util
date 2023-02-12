@@ -1,3 +1,7 @@
+## 0.6.5
+
+- Fetch `.contentModificationDateKey` in `listContents`.
+
 ## 0.6.0
 
 - Added `isEmptyDirectory`.
