@@ -51,18 +51,24 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         var error: NSError? = nil
         NSFileCoordinator().coordinate(readingItemAt: srcURL, error: &error) { (url) in
           do {
-            let contentURLs = try FileManager.default.contentsOfDirectory(at: srcURL, includingPropertiesForKeys: [.nameKey, .fileSizeKey, .isDirectoryKey])
+            let contentURLs = try FileManager.default.contentsOfDirectory(at: srcURL, includingPropertiesForKeys: [.nameKey, .fileSizeKey, .isDirectoryKey, .contentModificationDateKey])
             
             var fileMaps: [[String: Any?]] = []
             for fileURL in contentURLs {
               do {
-                let fileAttributes = try fileURL.resourceValues(forKeys:[.nameKey, .fileSizeKey,  .isDirectoryKey])
+                let fileAttributes = try fileURL.resourceValues(forKeys:[.nameKey, .fileSizeKey,  .isDirectoryKey, .contentModificationDateKey])
+                let lastModRaw = fileAttributes.contentModificationDate
+                var lastMod: Int? = nil
+                if let lastModRaw = lastModRaw {
+                  lastMod = Int(lastModRaw.timeIntervalSince1970)
+                }
                 let fileDataMap: [String: Any?] = [
                   "name": fileAttributes.name,
                   "path": fileURL.path,
                   // Make sure `size` always has a value to ease parsing code on dart.
                   "length": fileAttributes.fileSize ?? 0,
-                  "isDir": fileAttributes.isDirectory
+                  "isDir": fileAttributes.isDirectory,
+                  "lastMod": lastMod
                 ]
                 fileMaps.append(fileDataMap)
               } catch { print(error, fileURL) }

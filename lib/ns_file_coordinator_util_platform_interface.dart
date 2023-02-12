@@ -7,6 +7,7 @@ class NsFileCoordinatorEntity {
   final String name;
   final bool isDir;
   final int length;
+  late final DateTime? lastMod;
 
   NsFileCoordinatorEntity(this.path, this.name, this.isDir, this.length);
 
@@ -14,11 +15,20 @@ class NsFileCoordinatorEntity {
       : path = json['path'] as String,
         name = json['name'] as String,
         isDir = json['isDir'] as bool,
-        length = json['length'] as int;
+        length = json['length'] as int {
+    var lastModTimestamp = json['lastMod'] as int?;
+    if (lastModTimestamp != null) {
+      lastMod = DateTime.fromMillisecondsSinceEpoch(lastModTimestamp * 1000);
+    }
+  }
 
   @override
   String toString() {
-    return '${isDir ? 'D' : 'F'}|$name${isDir ? '' : '|$length'}';
+    var s = '${isDir ? 'D' : 'F'}|$name${isDir ? '' : '|$length'}';
+    if (lastMod != null) {
+      s += '|${lastMod.toString()}';
+    }
+    return s;
   }
 }
 
