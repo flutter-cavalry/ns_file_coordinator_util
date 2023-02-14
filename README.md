@@ -11,6 +11,8 @@ NOTE: this plugin doesn't automatically call `startAccessingSecurityScopedResour
 Future<void> readFile(String src, String dest);
 
 /// Gets the contents of an iCloud directory [path] and returns an array of [NsFileCoordinatorEntity].
+///
+/// [recursive] whether to list subdirectories recursively.
 Future<List<NsFileCoordinatorEntity>> listContents(String path);
 
 /// Deletes the given iCloud [path].

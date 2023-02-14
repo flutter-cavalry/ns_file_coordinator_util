@@ -16,11 +16,11 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
   }
 
   @override
-  Future<List<NsFileCoordinatorEntity>> listContents(String path) async {
+  Future<List<NsFileCoordinatorEntity>> listContents(String path,
+      {bool? recursive}) async {
     var entityMaps = await methodChannel
-        .invokeListMethod<Map<dynamic, dynamic>>('listContents', {
-      'src': path,
-    });
+        .invokeListMethod<Map<dynamic, dynamic>>(
+            'listContents', {'src': path, 'recursive': recursive});
     if (entityMaps == null) {
       return [];
     }

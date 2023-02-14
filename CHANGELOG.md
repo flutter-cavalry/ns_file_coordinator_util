@@ -1,6 +1,10 @@
+## 0.7.5
+
+- Added `recursive` argument to `listContents` function.
+
 ## 0.7.0
 
-- Rename `exists` to `entityType` to return entity type whiling checking existence.
+- Renamed `exists` to `entityType` to return entity type whiling checking existence.
 
 ## 0.6.5
 

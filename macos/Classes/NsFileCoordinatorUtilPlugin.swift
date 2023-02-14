@@ -45,13 +45,26 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
       case "listContents":
         // Arguments are enforced on dart side.
         let src = args["src"] as! String
+        let recursive = args["recursive"] as? Bool ?? false
         
         let srcURL = URL(fileURLWithPath: src)
         
         var error: NSError? = nil
         NSFileCoordinator().coordinate(readingItemAt: srcURL, error: &error) { (url) in
           do {
-            let contentURLs = try FileManager.default.contentsOfDirectory(at: srcURL, includingPropertiesForKeys: [.nameKey, .fileSizeKey, .isDirectoryKey, .contentModificationDateKey])
+            var contentURLs: [URL]
+            let resKeys: [URLResourceKey] = [.nameKey, .fileSizeKey, .isDirectoryKey, .contentModificationDateKey]
+            if recursive {
+              var urls = [URL]()
+              if let enumerator = FileManager.default.enumerator(at: url, includingPropertiesForKeys: resKeys) {
+                  for case let fileURL as URL in enumerator {
+                    urls.append(fileURL)
+                  }
+              }
+              contentURLs = urls
+            } else {
+              contentURLs = try FileManager.default.contentsOfDirectory(at: srcURL, includingPropertiesForKeys: resKeys)
+            }
             
             var fileMaps: [[String: Any?]] = []
             for fileURL in contentURLs {
