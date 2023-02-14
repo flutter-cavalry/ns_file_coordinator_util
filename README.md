@@ -23,7 +23,9 @@ Future<void> move(String src, String dest);
 Future<void> copy(String src, String dest);
 
 /// Checks if the given iCloud [path] exists.
-Future<bool> exists(String path) async;
+/// Returns true if the path is a directory, or false for files. `null` if
+/// the path doesn't exist.
+Future<bool?> entityType(String path) async;
 
 /// Creates a directory [path] like [mkdir -p].
 Future<void> mkdir(String path) async;

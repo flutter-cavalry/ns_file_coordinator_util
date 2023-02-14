@@ -1,3 +1,7 @@
+## 0.7.0
+
+- Rename `exists` to `entityType` to return entity type whiling checking existence.
+
 ## 0.6.5
 
 - Fetch `.contentModificationDateKey` in `listContents`.

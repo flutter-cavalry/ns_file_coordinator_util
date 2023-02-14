@@ -74,8 +74,8 @@ abstract class NsFileCoordinatorUtilPlatform extends PlatformInterface {
     throw UnimplementedError('copy() has not been implemented.');
   }
 
-  Future<bool> exists(String path) async {
-    throw UnimplementedError('exists() has not been implemented.');
+  Future<bool?> entityType(String path) async {
+    throw UnimplementedError('entityType() has not been implemented.');
   }
 
   Future<void> mkdir(String path) async {

@@ -169,16 +169,17 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         }
         
         
-      case "exists":
+      case "entityType":
         // Arguments are enforced on dart side.
         let src = args["src"] as! String
         let srcURL = URL(fileURLWithPath: src)
         
         var error: NSError? = nil
         NSFileCoordinator().coordinate(readingItemAt: srcURL, error: &error) { (url) in
-          let exists = FileManager.default.fileExists(atPath: src)
+          var isDirectory: ObjCBool = false
+          let exists = FileManager.default.fileExists(atPath: src, isDirectory: &isDirectory)
           DispatchQueue.main.async {
-            result(exists)
+            result(exists ? isDirectory.boolValue : nil)
           }
         }
         if let error = error {

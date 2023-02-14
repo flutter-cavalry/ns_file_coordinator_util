@@ -43,9 +43,8 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
   }
 
   @override
-  Future<bool> exists(String path) async {
-    return await methodChannel.invokeMethod<bool>('exists', {'src': path}) ??
-        false;
+  Future<bool?> entityType(String path) async {
+    return await methodChannel.invokeMethod<bool>('entityType', {'src': path});
   }
 
   @override

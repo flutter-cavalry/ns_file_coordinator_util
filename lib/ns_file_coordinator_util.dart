@@ -27,8 +27,10 @@ class NsFileCoordinatorUtil {
   }
 
   /// Checks if the given iCloud [path] exists.
-  Future<bool> exists(String path) async {
-    return NsFileCoordinatorUtilPlatform.instance.exists(path);
+  /// Returns true if the path is a directory, or false for files. `null` if
+  /// the path doesn't exist.
+  Future<bool?> entityType(String path) async {
+    return NsFileCoordinatorUtilPlatform.instance.entityType(path);
   }
 
   /// Creates a directory [path] like [mkdir -p].

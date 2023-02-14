@@ -116,7 +116,9 @@ class _MyHomeState extends State<MyHome> {
       _sep(),
       OutlinedButton(onPressed: _copyPath, child: const Text('Copy path')),
       _sep(),
-      OutlinedButton(onPressed: _exists, child: const Text('Check existence')),
+      OutlinedButton(
+          onPressed: _entityType,
+          child: const Text('Check existence (is directory)')),
       _sep(),
       OutlinedButton(onPressed: _mkdir, child: const Text('Mkdir')),
       _sep(),
@@ -275,7 +277,7 @@ class _MyHomeState extends State<MyHome> {
     }
   }
 
-  Future<void> _exists() async {
+  Future<void> _entityType() async {
     try {
       var dir = _icloudFolder;
       var fileRelPath = _fileTextController.text;
@@ -287,7 +289,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Checking if $fileAbsPath exists';
       });
-      var res = await _plugin.exists(fileAbsPath);
+      var res = await _plugin.entityType(fileAbsPath);
       setState(() {
         _output = 'Result: $res';
       });
