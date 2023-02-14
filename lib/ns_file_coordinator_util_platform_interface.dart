@@ -59,7 +59,7 @@ abstract class NsFileCoordinatorUtilPlatform extends PlatformInterface {
   }
 
   Future<List<NsFileCoordinatorEntity>> listContents(String path,
-      {bool? recursive}) async {
+      {bool? recursive, bool? filesOnly}) async {
     throw UnimplementedError('listContents() has not been implemented.');
   }
 

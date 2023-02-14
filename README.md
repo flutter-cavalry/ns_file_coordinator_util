@@ -13,6 +13,7 @@ Future<void> readFile(String src, String dest);
 /// Gets the contents of an iCloud directory [path] and returns an array of [NsFileCoordinatorEntity].
 ///
 /// [recursive] whether to list subdirectories recursively.
+/// [filesOnly] return files only.
 Future<List<NsFileCoordinatorEntity>> listContents(String path);
 
 /// Deletes the given iCloud [path].

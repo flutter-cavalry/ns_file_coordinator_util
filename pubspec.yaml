@@ -1,6 +1,6 @@
 name: ns_file_coordinator_util
 description: Helper functions for `NSFileCoordinator` (iOS/macOS only).
-version: 0.7.5
+version: 0.7.10
 homepage: https://github.com/flutter-cavalry/ns_file_coordinator_util
 
 environment:

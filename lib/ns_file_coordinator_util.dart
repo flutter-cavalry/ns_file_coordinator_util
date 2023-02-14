@@ -9,10 +9,11 @@ class NsFileCoordinatorUtil {
   /// Gets the contents of an iCloud directory [path] and returns an array of [NsFileCoordinatorEntity].
   ///
   /// [recursive] whether to list subdirectories recursively.
+  /// [filesOnly] return files only.
   Future<List<NsFileCoordinatorEntity>> listContents(String path,
-      {bool? recursive}) async {
+      {bool? recursive, bool? filesOnly}) async {
     return NsFileCoordinatorUtilPlatform.instance
-        .listContents(path, recursive: recursive);
+        .listContents(path, recursive: recursive, filesOnly: filesOnly);
   }
 
   /// Deletes the given iCloud [path].

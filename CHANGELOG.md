@@ -1,3 +1,7 @@
+## 0.7.10
+
+- Added `filesOnly` to `listContents` function.
+
 ## 0.7.5
 
 - Added `recursive` argument to `listContents` function.

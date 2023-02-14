@@ -46,6 +46,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         // Arguments are enforced on dart side.
         let src = args["src"] as! String
         let recursive = args["recursive"] as? Bool ?? false
+        let filesOnly = args["filesOnly"] as? Bool ?? false
         
         let srcURL = URL(fileURLWithPath: src)
         
@@ -64,6 +65,10 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
               contentURLs = urls
             } else {
               contentURLs = try FileManager.default.contentsOfDirectory(at: srcURL, includingPropertiesForKeys: resKeys)
+            }
+            
+            if (filesOnly) {
+              contentURLs = contentURLs.filter { !$0.hasDirectoryPath }
             }
             
             var fileMaps: [[String: Any?]] = []

@@ -191,9 +191,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Listing contents of $dir';
       });
-      var contents = await _plugin.listContents(
-        dir,
-      );
+      var contents = await _plugin.listContents(dir);
       setState(() {
         _output = '--- Contents ---\n${contents.join('\n')}';
       });
