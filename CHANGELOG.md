@@ -1,3 +1,7 @@
+## 0.8.0
+
+- Added `stat` function.
+
 ## 0.7.10
 
 - Added `filesOnly` to `listContents` function.

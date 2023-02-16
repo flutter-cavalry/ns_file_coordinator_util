@@ -2,6 +2,8 @@ import Flutter
 import UIKit
 
 public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
+  static let fsResourceKeys: [URLResourceKey] = [.nameKey, .fileSizeKey, .isDirectoryKey, .contentModificationDateKey]
+  
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "ns_file_coordinator_util", binaryMessenger: registrar.messenger())
     let instance = NsFileCoordinatorUtilPlugin()
@@ -42,6 +44,31 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           }
         }
         
+      case "stat":
+        // Arguments are enforced on dart side.
+        let src = args["src"] as! String
+        
+        let srcURL = URL(fileURLWithPath: src)
+        
+        var error: NSError? = nil
+        NSFileCoordinator().coordinate(readingItemAt: srcURL, error: &error) { (url) in
+          do {
+            var statMap = try NsFileCoordinatorUtilPlugin.fsStat(url: srcURL)
+            DispatchQueue.main.async {
+              result(statMap)
+            }
+          } catch {
+            DispatchQueue.main.async {
+              result(FlutterError(code: "StatError", message: error.localizedDescription, details: nil))
+            }
+          }
+        }
+        if let error = error {
+          DispatchQueue.main.async {
+            result(FlutterError(code: "NSFileCoordinatorError", message: error.localizedDescription, details: nil))
+          }
+        }
+        
       case "listContents":
         // Arguments are enforced on dart side.
         let src = args["src"] as! String
@@ -54,45 +81,30 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         NSFileCoordinator().coordinate(readingItemAt: srcURL, error: &error) { (url) in
           do {
             var contentURLs: [URL]
-            let resKeys: [URLResourceKey] = [.nameKey, .fileSizeKey, .isDirectoryKey, .contentModificationDateKey]
             if recursive {
               var urls = [URL]()
-              if let enumerator = FileManager.default.enumerator(at: url, includingPropertiesForKeys: resKeys) {
+              if let enumerator = FileManager.default.enumerator(at: url, includingPropertiesForKeys: NsFileCoordinatorUtilPlugin.fsResourceKeys) {
                   for case let fileURL as URL in enumerator {
                     urls.append(fileURL)
                   }
               }
               contentURLs = urls
             } else {
-              contentURLs = try FileManager.default.contentsOfDirectory(at: srcURL, includingPropertiesForKeys: resKeys)
+              contentURLs = try FileManager.default.contentsOfDirectory(at: srcURL, includingPropertiesForKeys: NsFileCoordinatorUtilPlugin.fsResourceKeys)
             }
             
             if (filesOnly) {
               contentURLs = contentURLs.filter { !$0.hasDirectoryPath }
             }
             
-            var fileMaps: [[String: Any?]] = []
+            var statMaps: [[String: Any?]] = []
             for fileURL in contentURLs {
               do {
-                let fileAttributes = try fileURL.resourceValues(forKeys:[.nameKey, .fileSizeKey,  .isDirectoryKey, .contentModificationDateKey])
-                let lastModRaw = fileAttributes.contentModificationDate
-                var lastMod: Int? = nil
-                if let lastModRaw = lastModRaw {
-                  lastMod = Int(lastModRaw.timeIntervalSince1970)
-                }
-                let fileDataMap: [String: Any?] = [
-                  "name": fileAttributes.name,
-                  "path": fileURL.path,
-                  // Make sure `size` always has a value to ease parsing code on dart.
-                  "length": fileAttributes.fileSize ?? 0,
-                  "isDir": fileAttributes.isDirectory,
-                  "lastMod": lastMod
-                ]
-                fileMaps.append(fileDataMap)
+                try statMaps.append(NsFileCoordinatorUtilPlugin.fsStat(url: fileURL))
               } catch { print(error, fileURL) }
             }
             DispatchQueue.main.async {
-              result(fileMaps)
+              result(statMaps)
             }
           } catch {
             DispatchQueue.main.async {
@@ -263,5 +275,23 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         }
       }
     }
+  }
+  
+  private static func fsStat(url: URL) throws -> [String: Any?] {
+    let fileAttributes = try url.resourceValues(forKeys: Set(NsFileCoordinatorUtilPlugin.fsResourceKeys))
+    let lastModRaw = fileAttributes.contentModificationDate
+    var lastMod: Int? = nil
+    if let lastModRaw = lastModRaw {
+      lastMod = Int(lastModRaw.timeIntervalSince1970)
+    }
+    let stat: [String: Any?] = [
+      "name": fileAttributes.name,
+      "path": url.path,
+      // Make sure `size` always has a value to ease parsing code on dart.
+      "length": fileAttributes.fileSize ?? 0,
+      "isDir": fileAttributes.isDirectory,
+      "lastMod": lastMod
+    ]
+    return stat
   }
 }

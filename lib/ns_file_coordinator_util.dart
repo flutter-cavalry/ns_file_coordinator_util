@@ -6,6 +6,11 @@ class NsFileCoordinatorUtil {
     return NsFileCoordinatorUtilPlatform.instance.readFile(src, dest);
   }
 
+  /// Returns information about the given [path].
+  Future<NsFileCoordinatorEntity> stat(String path) async {
+    return NsFileCoordinatorUtilPlatform.instance.stat(path);
+  }
+
   /// Gets the contents of an iCloud directory [path] and returns an array of [NsFileCoordinatorEntity].
   ///
   /// [recursive] whether to list subdirectories recursively.

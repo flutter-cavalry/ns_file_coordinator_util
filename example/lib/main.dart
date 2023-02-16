@@ -108,6 +108,8 @@ class _MyHomeState extends State<MyHome> {
       OutlinedButton(
           onPressed: _download, child: const Text('Read/download file')),
       _sep(),
+      OutlinedButton(onPressed: _stat, child: const Text('Get information')),
+      _sep(),
       OutlinedButton(onPressed: _list, child: const Text('List contents')),
       _sep(),
       OutlinedButton(onPressed: _delete, child: const Text('Delete')),
@@ -194,6 +196,30 @@ class _MyHomeState extends State<MyHome> {
       var contents = await _plugin.listContents(dir);
       setState(() {
         _output = '--- Contents ---\n${contents.join('\n')}';
+      });
+    } catch (err) {
+      setState(() {
+        _output = '';
+      });
+      await _showErrorAlert(context, err.toString());
+    }
+  }
+
+  Future<void> _stat() async {
+    try {
+      var dir = _icloudFolder;
+      var fileRelPath = _fileTextController.text;
+      if (fileRelPath.isEmpty || dir == null) {
+        return;
+      }
+      var fileAbsPath = p.join(dir, fileRelPath);
+
+      setState(() {
+        _output = 'Getting information of $dir';
+      });
+      var inf = await _plugin.stat(fileAbsPath);
+      setState(() {
+        _output = inf.toString();
       });
     } catch (err) {
       setState(() {

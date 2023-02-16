@@ -10,6 +10,9 @@ NOTE: this plugin doesn't automatically call `startAccessingSecurityScopedResour
 /// Reads an iCloud [src] file and copies it to [dest].
 Future<void> readFile(String src, String dest);
 
+/// Returns information about the given [path].
+Future<NsFileCoordinatorEntity> stat(String path);
+
 /// Gets the contents of an iCloud directory [path] and returns an array of [NsFileCoordinatorEntity].
 ///
 /// [recursive] whether to list subdirectories recursively.
@@ -17,7 +20,7 @@ Future<void> readFile(String src, String dest);
 Future<List<NsFileCoordinatorEntity>> listContents(String path);
 
 /// Deletes the given iCloud [path].
-Future<void> delete(String path) async;
+Future<void> delete(String path);
 
 /// Moves [src] path to [dest].
 Future<void> move(String src, String dest);
@@ -28,10 +31,10 @@ Future<void> copy(String src, String dest);
 /// Checks if the given iCloud [path] exists.
 /// Returns true if the path is a directory, or false for files. `null` if
 /// the path doesn't exist.
-Future<bool?> entityType(String path) async;
+Future<bool?> entityType(String path);
 
 /// Creates a directory [path] like [mkdir -p].
-Future<void> mkdir(String path) async;
+Future<void> mkdir(String path);
 
 /// Checks if the directory [path] is empty.
 Future<void> isEmptyDirectory(String path);

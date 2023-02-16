@@ -16,6 +16,13 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
   }
 
   @override
+  Future<NsFileCoordinatorEntity> stat(String path) async {
+    var map = await methodChannel
+        .invokeMapMethod<dynamic, dynamic>('stat', {'src': path});
+    return NsFileCoordinatorEntity.fromJson(map ?? {});
+  }
+
+  @override
   Future<List<NsFileCoordinatorEntity>> listContents(String path,
       {bool? recursive, bool? filesOnly}) async {
     var entityMaps = await methodChannel
