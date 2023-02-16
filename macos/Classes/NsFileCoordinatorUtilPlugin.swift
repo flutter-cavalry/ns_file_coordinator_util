@@ -53,7 +53,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         var error: NSError? = nil
         NSFileCoordinator().coordinate(readingItemAt: srcURL, error: &error) { (url) in
           do {
-            var statMap = try NsFileCoordinatorUtilPlugin.fsStat(url: srcURL)
+            let statMap = try NsFileCoordinatorUtilPlugin.fsStat(url: srcURL)
             DispatchQueue.main.async {
               result(statMap)
             }
