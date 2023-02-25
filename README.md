@@ -28,10 +28,10 @@ Future<void> move(String src, String dest);
 /// Copies [src] path to iCloud [dest].
 Future<void> copy(String src, String dest);
 
-/// Checks if the given iCloud [path] exists.
-/// Returns true if the path is a directory, or false for files. `null` if
-/// the path doesn't exist.
-Future<bool?> entityType(String path);
+  /// Checks if the given iCloud [path] is a directory.
+  /// Returns true if the path is a directory, or false if it's a file.
+  /// `null` if the path doesn't exist.
+Future<bool?> isDirectory(String path);
 
 /// Creates a directory [path] like [mkdir -p].
 Future<void> mkdir(String path);

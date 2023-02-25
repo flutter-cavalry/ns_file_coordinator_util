@@ -179,7 +179,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         let destURL = URL(fileURLWithPath: dest)
         
         var error: NSError? = nil
-        NSFileCoordinator().coordinate(writingItemAt: destURL, error: &error) { destURL in
+        NSFileCoordinator().coordinate(readingItemAt: srcURL, writingItemAt: destURL, error: &error) { srcURL, destURL in
           do {
             try FileManager.default.createDirectory(at: destURL.deletingLastPathComponent(), withIntermediateDirectories: true)
             try FileManager.default.copyItem(at: srcURL, to: destURL)
@@ -199,7 +199,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         }
         
         
-      case "entityType":
+      case "isDirectory":
         // Arguments are enforced on dart side.
         let src = args["src"] as! String
         let srcURL = URL(fileURLWithPath: src)

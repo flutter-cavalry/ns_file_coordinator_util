@@ -1,3 +1,7 @@
+## 0.9.0
+
+- Renamed `entityType` to `isDirectory`
+
 ## 0.8.0
 
 - Added `stat` function.

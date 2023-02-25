@@ -50,8 +50,8 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
   }
 
   @override
-  Future<bool?> entityType(String path) async {
-    return await methodChannel.invokeMethod<bool>('entityType', {'src': path});
+  Future<bool?> isDirectory(String path) async {
+    return await methodChannel.invokeMethod<bool>('isDirectory', {'src': path});
   }
 
   @override
