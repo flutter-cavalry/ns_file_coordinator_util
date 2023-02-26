@@ -18,12 +18,12 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     DispatchQueue.global().async {
       switch call.method {
       case "readFile":
-        // Arguments are enforced on dart side.
-        let src = args["src"] as! String
-        let dest = args["dest"] as! String
-        
-        let srcURL = URL(fileURLWithPath: src)
-        let destURL = URL(fileURLWithPath: dest)
+        guard let srcURL = URL(string: args["src"] as! String), let destURL = URL(string: args["dest"] as! String) else {
+          DispatchQueue.main.async {
+            result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
+          }
+          return
+        }
         
         var error: NSError? = nil
         NSFileCoordinator().coordinate(readingItemAt: srcURL, error: &error) { (url) in
@@ -45,10 +45,12 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         }
         
       case "stat":
-        // Arguments are enforced on dart side.
-        let src = args["src"] as! String
-        
-        let srcURL = URL(fileURLWithPath: src)
+        guard let srcURL = URL(string: args["path"] as! String) else {
+          DispatchQueue.main.async {
+            result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
+          }
+          return
+        }
         
         var error: NSError? = nil
         NSFileCoordinator().coordinate(readingItemAt: srcURL, error: &error) { (url) in
@@ -70,12 +72,14 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         }
         
       case "listContents":
-        // Arguments are enforced on dart side.
-        let src = args["src"] as! String
+        guard let srcURL = URL(string: args["path"] as! String) else {
+          DispatchQueue.main.async {
+            result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
+          }
+          return
+        }
         let recursive = args["recursive"] as? Bool ?? false
         let filesOnly = args["filesOnly"] as? Bool ?? false
-        
-        let srcURL = URL(fileURLWithPath: src)
         
         var error: NSError? = nil
         NSFileCoordinator().coordinate(readingItemAt: srcURL, error: &error) { (url) in
@@ -119,10 +123,12 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         }
         
       case "delete":
-        // Arguments are enforced on dart side.
-        let src = args["src"] as! String
-        
-        let srcURL = URL(fileURLWithPath: src)
+        guard let srcURL = URL(string: args["path"] as! String) else {
+          DispatchQueue.main.async {
+            result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
+          }
+          return
+        }
         
         var error: NSError? = nil
         NSFileCoordinator().coordinate(writingItemAt: srcURL, options: .forDeleting, error: &error) { (url) in
@@ -144,12 +150,12 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         }
         
       case "move":
-        // Arguments are enforced on dart side.
-        let src = args["src"] as! String
-        let dest = args["dest"] as! String
-        
-        let srcURL = URL(fileURLWithPath: src)
-        let destURL = URL(fileURLWithPath: dest)
+        guard let srcURL = URL(string: args["src"] as! String), let destURL = URL(string: args["dest"] as! String) else {
+          DispatchQueue.main.async {
+            result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
+          }
+          return
+        }
         
         var error: NSError? = nil
         NSFileCoordinator().coordinate(writingItemAt: srcURL, options: .forMoving, writingItemAt: destURL, options: .forReplacing, error: &error) { srcURL, destURL in
@@ -171,12 +177,12 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         }
         
       case "copy":
-        // Arguments are enforced on dart side.
-        let src = args["src"] as! String
-        let dest = args["dest"] as! String
-        
-        let srcURL = URL(fileURLWithPath: src)
-        let destURL = URL(fileURLWithPath: dest)
+        guard let srcURL = URL(string: args["src"] as! String), let destURL = URL(string: args["dest"] as! String) else {
+          DispatchQueue.main.async {
+            result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
+          }
+          return
+        }
         
         var error: NSError? = nil
         NSFileCoordinator().coordinate(readingItemAt: srcURL, writingItemAt: destURL, error: &error) { srcURL, destURL in
@@ -200,14 +206,17 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         
         
       case "isDirectory":
-        // Arguments are enforced on dart side.
-        let src = args["src"] as! String
-        let srcURL = URL(fileURLWithPath: src)
+        guard let srcURL = URL(string: args["path"] as! String) else {
+          DispatchQueue.main.async {
+            result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
+          }
+          return
+        }
         
         var error: NSError? = nil
         NSFileCoordinator().coordinate(readingItemAt: srcURL, error: &error) { (url) in
           var isDirectory: ObjCBool = false
-          let exists = FileManager.default.fileExists(atPath: src, isDirectory: &isDirectory)
+          let exists = FileManager.default.fileExists(atPath: srcURL.path, isDirectory: &isDirectory)
           DispatchQueue.main.async {
             result(exists ? isDirectory.boolValue : nil)
           }
@@ -219,10 +228,12 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         }
         
       case "mkdir":
-        // Arguments are enforced on dart side.
-        let src = args["src"] as! String
-        
-        let srcURL = URL(fileURLWithPath: src)
+        guard let srcURL = URL(string: args["path"] as! String) else {
+          DispatchQueue.main.async {
+            result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
+          }
+          return
+        }
         
         var error: NSError? = nil
         NSFileCoordinator().coordinate(writingItemAt: srcURL, error: &error) { destURL in
@@ -244,10 +255,12 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         }
         
       case "isEmptyDirectory":
-        // Arguments are enforced on dart side.
-        let src = args["src"] as! String
-        
-        let srcURL = URL(fileURLWithPath: src)
+        guard let srcURL = URL(string: args["path"] as! String) else {
+          DispatchQueue.main.async {
+            result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
+          }
+          return
+        }
         
         var error: NSError? = nil
         NSFileCoordinator().coordinate(readingItemAt: srcURL, error: &error) { (url) in
