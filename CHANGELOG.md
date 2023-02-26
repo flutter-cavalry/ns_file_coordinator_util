@@ -1,3 +1,7 @@
+## 0.10.0
+
+- Migrate to Uri based APIs
+
 ## 0.9.0
 
 - Renamed `entityType` to `isDirectory`
