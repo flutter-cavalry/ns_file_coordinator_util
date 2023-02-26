@@ -3,16 +3,16 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'ns_file_coordinator_util_method_channel.dart';
 
 class NsFileCoordinatorEntity {
-  final String path;
+  final String url;
   final String name;
   final bool isDir;
   final int length;
   late final DateTime? lastMod;
 
-  NsFileCoordinatorEntity(this.path, this.name, this.isDir, this.length);
+  NsFileCoordinatorEntity(this.url, this.name, this.isDir, this.length);
 
   NsFileCoordinatorEntity.fromJson(Map<dynamic, dynamic> json)
-      : path = json['path'] as String,
+      : url = json['url'] as String,
         name = json['name'] as String,
         isDir = json['isDir'] as bool,
         length = json['length'] as int {

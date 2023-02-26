@@ -299,7 +299,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     }
     let stat: [String: Any?] = [
       "name": fileAttributes.name,
-      "path": url.path,
+      "url": url.absoluteString,
       // Make sure `size` always has a value to ease parsing code on dart.
       "length": fileAttributes.fileSize ?? 0,
       "isDir": fileAttributes.isDirectory,

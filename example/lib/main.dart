@@ -217,9 +217,9 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Getting information of $dir';
       });
-      var inf = await _plugin.stat(Uri.file(fileAbsPath));
+      var info = await _plugin.stat(Uri.file(fileAbsPath));
       setState(() {
-        _output = inf.toString();
+        _output = info.toString();
       });
     } catch (err) {
       setState(() {
