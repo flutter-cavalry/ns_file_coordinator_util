@@ -5,10 +5,10 @@ packages:
     dependency: "direct main"
     description:
       name: accessing_security_scoped_resource
-      sha256: "1c006a46f4468676e2ff9341ba533f757c7e8206ae82a46fe15686aa8ef9102e"
+      sha256: "744a1dbecfd4dd97293b364e86812f93b050683259cf31b4a22c1b601aea992a"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.3"
+    version: "1.0.0"
   async:
     dependency: transitive
     description:

@@ -145,7 +145,7 @@ class _MyHomeState extends State<MyHome> {
       }
 
       var hasAccess = await _accessPlugin
-          .startAccessingSecurityScopedResourceWithFilePath(dir);
+          .startAccessingSecurityScopedResourceWithURL(Uri.directory(dir));
       if (!hasAccess) {
         throw 'Failed to gain access to $dir';
       }
@@ -170,7 +170,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Reading/downloading $dir';
       });
-      await _plugin.readFile(fileAbsPath, destPath);
+      await _plugin.readFile(Uri.file(fileAbsPath), Uri.file(destPath));
 
       var length = await File(destPath).length();
       setState(() {
@@ -193,7 +193,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Listing contents of $dir';
       });
-      var contents = await _plugin.listContents(dir);
+      var contents = await _plugin.listContents(Uri.file(dir));
       setState(() {
         _output = '--- Contents ---\n${contents.join('\n')}';
       });
@@ -217,7 +217,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Getting information of $dir';
       });
-      var inf = await _plugin.stat(fileAbsPath);
+      var inf = await _plugin.stat(Uri.file(fileAbsPath));
       setState(() {
         _output = inf.toString();
       });
@@ -241,7 +241,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Deleting $dir';
       });
-      await _plugin.delete(fileAbsPath);
+      await _plugin.delete(Uri.file(fileAbsPath));
       setState(() {
         _output = 'Deleted';
       });
@@ -266,7 +266,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Rename $fileAbsPath to $newFileAbsPath';
       });
-      await _plugin.move(fileAbsPath, newFileAbsPath);
+      await _plugin.move(Uri.file(fileAbsPath), Uri.file(newFileAbsPath));
       setState(() {
         _output = 'Renamed';
       });
@@ -291,7 +291,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Writing to $fileAbsPath';
       });
-      await _plugin.copy(tmpDir, fileAbsPath);
+      await _plugin.copy(Uri.file(tmpDir), Uri.file(fileAbsPath));
       setState(() {
         _output = 'Succeeded';
       });
@@ -315,7 +315,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Checking if $fileAbsPath exists';
       });
-      var isDir = await _plugin.isDirectory(fileAbsPath);
+      var isDir = await _plugin.isDirectory(Uri.file(fileAbsPath));
       setState(() {
         _output = 'Result: $isDir';
       });
@@ -339,7 +339,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Creating directory $fileAbsPath';
       });
-      await _plugin.mkdir(fileAbsPath);
+      await _plugin.mkdir(Uri.file(fileAbsPath));
       setState(() {
         _output = 'Created';
       });
