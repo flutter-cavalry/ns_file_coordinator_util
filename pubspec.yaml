@@ -36,8 +36,10 @@ flutter:
     platforms:
       ios:
         pluginClass: NsFileCoordinatorUtilPlugin
+        sharedDarwinSource: true
       macos:
         pluginClass: NsFileCoordinatorUtilPlugin
+        sharedDarwinSource: true
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:

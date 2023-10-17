@@ -1,11 +1,21 @@
-import Cocoa
+import Foundation
+
+#if os(iOS)
+import Flutter
+#elseif os(macOS)
 import FlutterMacOS
+#endif
 
 public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
   static let fsResourceKeys: [URLResourceKey] = [.nameKey, .fileSizeKey, .isDirectoryKey, .contentModificationDateKey]
-
+  
   public static func register(with registrar: FlutterPluginRegistrar) {
-    let channel = FlutterMethodChannel(name: "ns_file_coordinator_util", binaryMessenger: registrar.messenger)
+#if os(iOS)
+    let binaryMessenger = registrar.messenger()
+#elseif os(macOS)
+    let binaryMessenger = registrar.messenger
+#endif
+    let channel = FlutterMethodChannel(name: "ns_file_coordinator_util", binaryMessenger: binaryMessenger)
     let instance = NsFileCoordinatorUtilPlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
   }
