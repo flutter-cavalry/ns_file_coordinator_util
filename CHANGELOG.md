@@ -1,3 +1,7 @@
+## 0.11.0
+
+- Replaced Dart `Uri` to `String`.
+
 ## 0.10.0
 
 - Migrate to Uri based APIs
