@@ -54,40 +54,40 @@ abstract class NsFileCoordinatorUtilPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<void> readFile(Uri src, Uri dest) {
+  Future<void> readFile(String srcUrl, String destUrl) {
     throw UnimplementedError('readFile() has not been implemented.');
   }
 
-  Future<NsFileCoordinatorEntity> stat(Uri path) async {
+  Future<NsFileCoordinatorEntity> stat(String url) async {
     throw UnimplementedError('stat() has not been implemented.');
   }
 
-  Future<List<NsFileCoordinatorEntity>> listContents(Uri path,
+  Future<List<NsFileCoordinatorEntity>> listContents(String url,
       {bool? recursive, bool? filesOnly}) async {
     throw UnimplementedError('listContents() has not been implemented.');
   }
 
-  Future<void> delete(Uri path) async {
+  Future<void> delete(String url) async {
     throw UnimplementedError('delete() has not been implemented.');
   }
 
-  Future<void> move(Uri src, Uri dest) {
+  Future<void> move(String srcUrl, String destUrl) {
     throw UnimplementedError('move() has not been implemented.');
   }
 
-  Future<void> copy(Uri src, Uri dest) {
+  Future<void> copy(String srcUrl, String destUrl) {
     throw UnimplementedError('copy() has not been implemented.');
   }
 
-  Future<bool?> isDirectory(Uri path) async {
+  Future<bool?> isDirectory(String url) async {
     throw UnimplementedError('isDirectory() has not been implemented.');
   }
 
-  Future<void> mkdir(Uri path) async {
+  Future<void> mkdir(String url) async {
     throw UnimplementedError('mkdir() has not been implemented.');
   }
 
-  Future<bool> isEmptyDirectory(Uri path) async {
+  Future<bool> isEmptyDirectory(String url) async {
     throw UnimplementedError('isEmptyDirectory() has not been implemented.');
   }
 }

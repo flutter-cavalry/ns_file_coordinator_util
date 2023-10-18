@@ -7,38 +7,38 @@ Helper functions for `NSFileCoordinator` (iOS/macOS only).
 NOTE: this plugin doesn't automatically call `startAccessingSecurityScopedResource`. You can call it yourself with [accessing_security_scoped_resource](https://pub.dev/packages/accessing_security_scoped_resource);
 
 ```dart
-/// Reads an iCloud [src] file and copies it to [dest].
-Future<void> readFile(Uri src, Uri dest);
+/// Reads an iCloud [srcUrl] file and copies it to [destUrl].
+Future<void> readFile(String srcUrl, String destUrl);
 
-/// Returns information about the given [path].
-Future<NsFileCoordinatorEntity> stat(Uri path);
+/// Returns information about the given [url].
+Future<NsFileCoordinatorEntity> stat(String url);
 
-/// Gets the contents of an iCloud directory [path] and returns an array of [NsFileCoordinatorEntity].
+/// Gets the contents of an iCloud directory [url] and returns an array of [NsFileCoordinatorEntity].
 ///
 /// [recursive] whether to list subdirectories recursively.
 /// [filesOnly] return files only.
-Future<List<NsFileCoordinatorEntity>> listContents(Uri path,
+Future<List<NsFileCoordinatorEntity>> listContents(String url,
     {bool? recursive, bool? filesOnly});
 
-/// Deletes the given iCloud [path].
-Future<void> delete(Uri path);
+/// Deletes the given iCloud [url].
+Future<void> delete(String url);
 
-/// Moves [src] path to [dest].
-Future<void> move(Uri src, Uri dest);
+/// Moves [srcUrl] url to [destUrl].
+Future<void> move(String srcUrl, String destUrl);
 
-/// Copies [src] path to iCloud [dest].
-Future<void> copy(Uri src, Uri dest);
+/// Copies [srcUrl] url to iCloud [destUrl].
+Future<void> copy(String srcUrl, String destUrl);
 
-/// Checks if the given iCloud [path] is a directory.
-/// Returns true if the path is a directory, or false if it's a file.
-/// `null` if the path doesn't exist.
-Future<bool?> isDirectory(Uri path);
+/// Checks if the given iCloud [url] is a directory.
+/// Returns true if the url is a directory, or false if it's a file.
+/// `null` if the url doesn't exist.
+Future<bool?> isDirectory(String url);
 
-/// Creates a directory [path] like [mkdir -p].
-Future<void> mkdir(Uri path);
+/// Creates a directory [url] like [mkdir -p].
+Future<void> mkdir(String url);
 
-/// Checks if the directory [path] is empty.
-Future<bool> isEmptyDirectory(Uri path);
+/// Checks if the directory [url] is empty.
+Future<bool> isEmptyDirectory(String url);
 ```
 
 Example:

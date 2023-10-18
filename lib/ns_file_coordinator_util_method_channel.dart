@@ -10,24 +10,24 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
   final methodChannel = const MethodChannel('ns_file_coordinator_util');
 
   @override
-  Future<void> readFile(Uri src, Uri dest) async {
+  Future<void> readFile(String srcUrl, String destUrl) async {
     await methodChannel.invokeMethod<void>(
-        'readFile', {'src': src.toString(), 'dest': dest.toString()});
+        'readFile', {'src': srcUrl.toString(), 'dest': destUrl.toString()});
   }
 
   @override
-  Future<NsFileCoordinatorEntity> stat(Uri path) async {
+  Future<NsFileCoordinatorEntity> stat(String url) async {
     var map = await methodChannel
-        .invokeMapMethod<dynamic, dynamic>('stat', {'path': path.toString()});
+        .invokeMapMethod<dynamic, dynamic>('stat', {'path': url.toString()});
     return NsFileCoordinatorEntity.fromJson(map ?? {});
   }
 
   @override
-  Future<List<NsFileCoordinatorEntity>> listContents(Uri path,
+  Future<List<NsFileCoordinatorEntity>> listContents(String url,
       {bool? recursive, bool? filesOnly}) async {
     var entityMaps = await methodChannel
         .invokeListMethod<Map<dynamic, dynamic>>('listContents', {
-      'path': path.toString(),
+      'path': url.toString(),
       'recursive': recursive,
       'filesOnly': filesOnly
     });
@@ -38,37 +38,37 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
   }
 
   @override
-  Future<void> delete(Uri path) async {
-    await methodChannel.invokeMethod<void>('delete', {'path': path.toString()});
+  Future<void> delete(String url) async {
+    await methodChannel.invokeMethod<void>('delete', {'path': url.toString()});
   }
 
   @override
-  Future<void> move(Uri src, Uri dest) async {
+  Future<void> move(String srcUrl, String destUrl) async {
     await methodChannel.invokeMethod<void>(
-        'move', {'src': src.toString(), 'dest': dest.toString()});
+        'move', {'src': srcUrl.toString(), 'dest': destUrl.toString()});
   }
 
   @override
-  Future<void> copy(Uri src, Uri dest) async {
+  Future<void> copy(String srcUrl, String destUrl) async {
     await methodChannel.invokeMethod<void>(
-        'copy', {'src': src.toString(), 'dest': dest.toString()});
+        'copy', {'src': srcUrl.toString(), 'dest': destUrl.toString()});
   }
 
   @override
-  Future<bool?> isDirectory(Uri path) async {
+  Future<bool?> isDirectory(String url) async {
     return await methodChannel
-        .invokeMethod<bool>('isDirectory', {'path': path.toString()});
+        .invokeMethod<bool>('isDirectory', {'path': url.toString()});
   }
 
   @override
-  Future<void> mkdir(Uri path) async {
-    await methodChannel.invokeMethod<void>('mkdir', {'path': path.toString()});
+  Future<void> mkdir(String url) async {
+    await methodChannel.invokeMethod<void>('mkdir', {'path': url.toString()});
   }
 
   @override
-  Future<bool> isEmptyDirectory(Uri path) async {
-    return await methodChannel.invokeMethod<bool>(
-            'isEmptyDirectory', {'path': path.toString()}) ??
+  Future<bool> isEmptyDirectory(String url) async {
+    return await methodChannel
+            .invokeMethod<bool>('isEmptyDirectory', {'path': url.toString()}) ??
         false;
   }
 }

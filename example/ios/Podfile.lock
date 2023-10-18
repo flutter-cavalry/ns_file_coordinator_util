@@ -1,82 +1,43 @@
 PODS:
   - accessing_security_scoped_resource (0.0.1):
     - Flutter
-  - DKImagePickerController/Core (4.3.4):
-    - DKImagePickerController/ImageDataManager
-    - DKImagePickerController/Resource
-  - DKImagePickerController/ImageDataManager (4.3.4)
-  - DKImagePickerController/PhotoGallery (4.3.4):
-    - DKImagePickerController/Core
-    - DKPhotoGallery
-  - DKImagePickerController/Resource (4.3.4)
-  - DKPhotoGallery (0.0.17):
-    - DKPhotoGallery/Core (= 0.0.17)
-    - DKPhotoGallery/Model (= 0.0.17)
-    - DKPhotoGallery/Preview (= 0.0.17)
-    - DKPhotoGallery/Resource (= 0.0.17)
-    - SDWebImage
-    - SwiftyGif
-  - DKPhotoGallery/Core (0.0.17):
-    - DKPhotoGallery/Model
-    - DKPhotoGallery/Preview
-    - SDWebImage
-    - SwiftyGif
-  - DKPhotoGallery/Model (0.0.17):
-    - SDWebImage
-    - SwiftyGif
-  - DKPhotoGallery/Preview (0.0.17):
-    - DKPhotoGallery/Model
-    - DKPhotoGallery/Resource
-    - SDWebImage
-    - SwiftyGif
-  - DKPhotoGallery/Resource (0.0.17):
-    - SDWebImage
-    - SwiftyGif
-  - file_picker (0.0.1):
-    - DKImagePickerController/PhotoGallery
+    - FlutterMacOS
+  - darwin_url (0.0.1):
     - Flutter
+    - FlutterMacOS
   - Flutter (1.0.0)
+  - ios_document_picker (0.0.1):
+    - Flutter
   - ns_file_coordinator_util (0.0.1):
     - Flutter
     - FlutterMacOS
-  - SDWebImage (5.14.3):
-    - SDWebImage/Core (= 5.14.3)
-  - SDWebImage/Core (5.14.3)
-  - SwiftyGif (5.4.3)
 
 DEPENDENCIES:
-  - accessing_security_scoped_resource (from `.symlinks/plugins/accessing_security_scoped_resource/ios`)
-  - file_picker (from `.symlinks/plugins/file_picker/ios`)
+  - accessing_security_scoped_resource (from `.symlinks/plugins/accessing_security_scoped_resource/darwin`)
+  - darwin_url (from `.symlinks/plugins/darwin_url/darwin`)
   - Flutter (from `Flutter`)
+  - ios_document_picker (from `.symlinks/plugins/ios_document_picker/ios`)
   - ns_file_coordinator_util (from `.symlinks/plugins/ns_file_coordinator_util/darwin`)
-
-SPEC REPOS:
-  trunk:
-    - DKImagePickerController
-    - DKPhotoGallery
-    - SDWebImage
-    - SwiftyGif
 
 EXTERNAL SOURCES:
   accessing_security_scoped_resource:
-    :path: ".symlinks/plugins/accessing_security_scoped_resource/ios"
-  file_picker:
-    :path: ".symlinks/plugins/file_picker/ios"
+    :path: ".symlinks/plugins/accessing_security_scoped_resource/darwin"
+  darwin_url:
+    :path: ".symlinks/plugins/darwin_url/darwin"
   Flutter:
     :path: Flutter
+  ios_document_picker:
+    :path: ".symlinks/plugins/ios_document_picker/ios"
   ns_file_coordinator_util:
     :path: ".symlinks/plugins/ns_file_coordinator_util/darwin"
 
 SPEC CHECKSUMS:
-  accessing_security_scoped_resource: 8b910a90af120c420d121170da27e361a490d786
-  DKImagePickerController: b512c28220a2b8ac7419f21c491fc8534b7601ac
-  DKPhotoGallery: fdfad5125a9fdda9cc57df834d49df790dbb4179
-  file_picker: ce3938a0df3cc1ef404671531facef740d03f920
+  accessing_security_scoped_resource: 5328c9963fc8873d1b60650ff42101847d3ff0ea
+  darwin_url: a6439fcef7fdfdd19ac9f7aa4ffed427d98b1da3
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  ios_document_picker: d9bc7b50a43cfdb63aa6ee25ef21f0a8de50690c
   ns_file_coordinator_util: 4cf31ac1d10428abccef48fc74ada68c5693c98b
-  SDWebImage: 9c36e66c8ce4620b41a7407698dda44211a96764
-  SwiftyGif: 6c3eafd0ce693cad58bb63d2b2fb9bacb8552780
 
-PODFILE CHECKSUM: ef19549a9bc3046e7bb7d2fab4d021637c0c58a3
+PODFILE CHECKSUM: 775997f741c536251164e3eacf6e34abf2eb7a17
 
 COCOAPODS: 1.13.0

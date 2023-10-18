@@ -1,8 +1,12 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
 
 import 'package:accessing_security_scoped_resource/accessing_security_scoped_resource.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:darwin_url/darwin_url.dart';
 import 'package:flutter/material.dart';
+import 'package:ios_document_picker/ios_document_picker.dart';
+import 'package:ios_document_picker/ios_document_picker_platform_interface.dart';
 import 'package:macos_file_picker/macos_file_picker.dart';
 import 'package:macos_file_picker/macos_file_picker_platform_interface.dart';
 import 'dart:async';
@@ -37,7 +41,10 @@ class _MyHomeState extends State<MyHome> {
   String? _icloudFolder;
   final _plugin = NsFileCoordinatorUtil();
   final _macosPicker = MacosFilePicker();
+  final _iosPicker = IosDocumentPicker();
   final _accessPlugin = AccessingSecurityScopedResource();
+  final _darwinUrlPlugin = DarwinUrl();
+
   late TextEditingController _fileTextController;
   String _output = '';
 
@@ -118,9 +125,7 @@ class _MyHomeState extends State<MyHome> {
       _sep(),
       OutlinedButton(onPressed: _copyPath, child: const Text('Copy path')),
       _sep(),
-      OutlinedButton(
-          onPressed: _isDirectory,
-          child: const Text('Check existence (is directory)')),
+      OutlinedButton(onPressed: _exists, child: const Text('Check existence')),
       _sep(),
       OutlinedButton(onPressed: _mkdir, child: const Text('Mkdir')),
       _sep(),
@@ -129,28 +134,33 @@ class _MyHomeState extends State<MyHome> {
 
   Future<void> _selectFolder() async {
     try {
-      String? dir;
+      String? dirUrl;
       if (Platform.isMacOS) {
         var list = await _macosPicker.pick(MacosFilePickerMode.folder);
         if (list == null) {
-          dir = null;
+          dirUrl = null;
         } else {
-          dir = list.first;
+          dirUrl = list.first.url;
         }
       } else {
-        dir = await FilePicker.platform.getDirectoryPath();
+        final res = await _iosPicker.pick(DocumentPickerType.directory);
+        if (res == null) {
+          dirUrl = null;
+        } else {
+          dirUrl = res.first.url;
+        }
       }
-      if (dir == null) {
+      if (dirUrl == null) {
         return;
       }
 
       var hasAccess = await _accessPlugin
-          .startAccessingSecurityScopedResourceWithURL(Uri.directory(dir));
+          .startAccessingSecurityScopedResourceWithURL(dirUrl);
       if (!hasAccess) {
-        throw 'Failed to gain access to $dir';
+        throw 'Failed to gain access to $dirUrl';
       }
       setState(() {
-        _icloudFolder = dir;
+        _icloudFolder = dirUrl;
       });
     } catch (err) {
       await _showErrorAlert(context, err.toString());
@@ -164,13 +174,15 @@ class _MyHomeState extends State<MyHome> {
       if (fileRelPath.isEmpty || dir == null) {
         return;
       }
-      var fileAbsPath = p.join(dir, fileRelPath);
+      var fileAbsUrl =
+          await _darwinUrlPlugin.append(dir, fileRelPath, isDir: false);
       var destPath = tmpPath();
+      var destUrl = await _darwinUrlPlugin.filePathToUrl(destPath);
 
       setState(() {
         _output = 'Reading/downloading $dir';
       });
-      await _plugin.readFile(Uri.file(fileAbsPath), Uri.file(destPath));
+      await _plugin.readFile(fileAbsUrl, destUrl);
 
       var length = await File(destPath).length();
       setState(() {
@@ -193,7 +205,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Listing contents of $dir';
       });
-      var contents = await _plugin.listContents(Uri.file(dir));
+      var contents = await _plugin.listContents(dir);
       setState(() {
         _output = '--- Contents ---\n${contents.join('\n')}';
       });
@@ -212,12 +224,13 @@ class _MyHomeState extends State<MyHome> {
       if (fileRelPath.isEmpty || dir == null) {
         return;
       }
-      var fileAbsPath = p.join(dir, fileRelPath);
+      var fileAbsUrl =
+          await _darwinUrlPlugin.append(dir, fileRelPath, isDir: false);
 
       setState(() {
         _output = 'Getting information of $dir';
       });
-      var info = await _plugin.stat(Uri.file(fileAbsPath));
+      var info = await _plugin.stat(fileAbsUrl);
       setState(() {
         _output = info.toString();
       });
@@ -236,12 +249,13 @@ class _MyHomeState extends State<MyHome> {
       if (fileRelPath.isEmpty || dir == null) {
         return;
       }
-      var fileAbsPath = p.join(dir, fileRelPath);
+      var fileAbsUrl =
+          await _darwinUrlPlugin.append(dir, fileRelPath, isDir: false);
 
       setState(() {
         _output = 'Deleting $dir';
       });
-      await _plugin.delete(Uri.file(fileAbsPath));
+      await _plugin.delete(fileAbsUrl);
       setState(() {
         _output = 'Deleted';
       });
@@ -260,13 +274,15 @@ class _MyHomeState extends State<MyHome> {
       if (fileRelPath.isEmpty || dir == null) {
         return;
       }
-      var fileAbsPath = p.join(dir, fileRelPath);
-      var newFileAbsPath = p.join(p.dirname(fileAbsPath), 'newName');
+      var fileAbsUrl =
+          await _darwinUrlPlugin.append(dir, fileRelPath, isDir: false);
+      var newFileAbsUrl =
+          await _darwinUrlPlugin.append(dir, 'newName', isDir: false);
 
       setState(() {
-        _output = 'Rename $fileAbsPath to $newFileAbsPath';
+        _output = 'Rename $fileAbsUrl to $newFileAbsUrl';
       });
-      await _plugin.move(Uri.file(fileAbsPath), Uri.file(newFileAbsPath));
+      await _plugin.move(fileAbsUrl, newFileAbsUrl);
       setState(() {
         _output = 'Renamed';
       });
@@ -285,13 +301,15 @@ class _MyHomeState extends State<MyHome> {
       if (fileRelPath.isEmpty || dir == null) {
         return;
       }
-      var fileAbsPath = p.join(dir, fileRelPath);
+      var fileAbsUrl =
+          await _darwinUrlPlugin.append(dir, fileRelPath, isDir: false);
       var tmpDir = await _createTempDir();
+      var tmpDirUrl = await _darwinUrlPlugin.filePathToUrl(tmpDir);
 
       setState(() {
-        _output = 'Writing to $fileAbsPath';
+        _output = 'Writing to $fileAbsUrl';
       });
-      await _plugin.copy(Uri.file(tmpDir), Uri.file(fileAbsPath));
+      await _plugin.copy(tmpDirUrl, fileAbsUrl);
       setState(() {
         _output = 'Succeeded';
       });
@@ -303,21 +321,26 @@ class _MyHomeState extends State<MyHome> {
     }
   }
 
-  Future<void> _isDirectory() async {
+  Future<void> _exists() async {
     try {
       var dir = _icloudFolder;
       var fileRelPath = _fileTextController.text;
       if (fileRelPath.isEmpty || dir == null) {
         return;
       }
-      var fileAbsPath = p.join(dir, fileRelPath);
+      var fileAbsUrl =
+          await _darwinUrlPlugin.append(dir, fileRelPath, isDir: false);
 
       setState(() {
-        _output = 'Checking if $fileAbsPath exists';
+        _output = 'Checking if $fileAbsUrl exists';
       });
-      var isDir = await _plugin.isDirectory(Uri.file(fileAbsPath));
+      var isDir = await _plugin.isDirectory(fileAbsUrl);
       setState(() {
-        _output = 'Result: $isDir';
+        if (isDir == null) {
+          _output = 'Not found';
+          return;
+        }
+        _output = 'Result: ${isDir ? 'is a directory' : 'is a file'}';
       });
     } catch (err) {
       setState(() {
@@ -334,12 +357,13 @@ class _MyHomeState extends State<MyHome> {
       if (fileRelPath.isEmpty || dir == null) {
         return;
       }
-      var fileAbsPath = p.join(dir, fileRelPath);
+      var fileAbsUrl =
+          await _darwinUrlPlugin.append(dir, fileRelPath, isDir: false);
 
       setState(() {
-        _output = 'Creating directory $fileAbsPath';
+        _output = 'Creating directory $fileAbsUrl';
       });
-      await _plugin.mkdir(Uri.file(fileAbsPath));
+      await _plugin.mkdir(fileAbsUrl);
       setState(() {
         _output = 'Created';
       });
