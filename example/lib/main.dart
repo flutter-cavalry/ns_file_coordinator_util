@@ -232,7 +232,7 @@ class _MyHomeState extends State<MyHome> {
       });
       var info = await _plugin.stat(fileAbsUrl);
       setState(() {
-        _output = info.toString();
+        _output = info.fullDescription();
       });
     } catch (err) {
       setState(() {

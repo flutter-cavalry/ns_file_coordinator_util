@@ -1,3 +1,7 @@
+## 0.11.2
+
+- Make sure directory URLs always end with a trailing /.
+
 ## 0.11.0
 
 - Replaced Dart `Uri` to `String`.

@@ -30,6 +30,14 @@ class NsFileCoordinatorEntity {
     }
     return s;
   }
+
+  String fullDescription() {
+    var s = 'url: $url\nname: $name\nisDir: $isDir\nlength: $length';
+    if (lastMod != null) {
+      s += '\nlastMod: ${lastMod.toString()}';
+    }
+    return s;
+  }
 }
 
 abstract class NsFileCoordinatorUtilPlatform extends PlatformInterface {

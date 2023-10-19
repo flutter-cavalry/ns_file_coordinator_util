@@ -307,12 +307,19 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     if let lastModRaw = lastModRaw {
       lastMod = Int(lastModRaw.timeIntervalSince1970)
     }
+    let isDir = fileAttributes.isDirectory ?? false
+    var urlString = url.absoluteString
+    // Make sure directory URLs always end with a trailing /
+    if isDir && !urlString.hasSuffix("/") {
+      urlString += "/"
+    }
+    
     let stat: [String: Any?] = [
       "name": fileAttributes.name,
-      "url": url.absoluteString,
+      "url": urlString,
       // Make sure `size` always has a value to ease parsing code on dart.
       "length": fileAttributes.fileSize ?? 0,
-      "isDir": fileAttributes.isDirectory,
+      "isDir": isDir,
       "lastMod": lastMod
     ]
     return stat
