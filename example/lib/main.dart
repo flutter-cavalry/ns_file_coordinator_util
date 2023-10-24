@@ -175,7 +175,7 @@ class _MyHomeState extends State<MyHome> {
         return;
       }
       var fileAbsUrl =
-          await _darwinUrlPlugin.append(dir, fileRelPath, isDir: false);
+          await _darwinUrlPlugin.append(dir, [fileRelPath], isDir: false);
       var destPath = tmpPath();
       var destUrl = await _darwinUrlPlugin.filePathToUrl(destPath);
 
@@ -225,7 +225,7 @@ class _MyHomeState extends State<MyHome> {
         return;
       }
       var fileAbsUrl =
-          await _darwinUrlPlugin.append(dir, fileRelPath, isDir: false);
+          await _darwinUrlPlugin.append(dir, [fileRelPath], isDir: false);
 
       setState(() {
         _output = 'Getting information of $dir';
@@ -250,7 +250,7 @@ class _MyHomeState extends State<MyHome> {
         return;
       }
       var fileAbsUrl =
-          await _darwinUrlPlugin.append(dir, fileRelPath, isDir: false);
+          await _darwinUrlPlugin.append(dir, [fileRelPath], isDir: false);
 
       setState(() {
         _output = 'Deleting $dir';
@@ -275,9 +275,9 @@ class _MyHomeState extends State<MyHome> {
         return;
       }
       var fileAbsUrl =
-          await _darwinUrlPlugin.append(dir, fileRelPath, isDir: false);
+          await _darwinUrlPlugin.append(dir, [fileRelPath], isDir: false);
       var newFileAbsUrl =
-          await _darwinUrlPlugin.append(dir, 'newName', isDir: false);
+          await _darwinUrlPlugin.append(dir, ['newName'], isDir: false);
 
       setState(() {
         _output = 'Rename $fileAbsUrl to $newFileAbsUrl';
@@ -302,7 +302,7 @@ class _MyHomeState extends State<MyHome> {
         return;
       }
       var fileAbsUrl =
-          await _darwinUrlPlugin.append(dir, fileRelPath, isDir: false);
+          await _darwinUrlPlugin.append(dir, [fileRelPath], isDir: false);
       var tmpDir = await _createTempDir();
       var tmpDirUrl = await _darwinUrlPlugin.filePathToUrl(tmpDir);
 
@@ -329,7 +329,7 @@ class _MyHomeState extends State<MyHome> {
         return;
       }
       var fileAbsUrl =
-          await _darwinUrlPlugin.append(dir, fileRelPath, isDir: false);
+          await _darwinUrlPlugin.append(dir, [fileRelPath], isDir: false);
 
       setState(() {
         _output = 'Checking if $fileAbsUrl exists';
@@ -358,7 +358,7 @@ class _MyHomeState extends State<MyHome> {
         return;
       }
       var fileAbsUrl =
-          await _darwinUrlPlugin.append(dir, fileRelPath, isDir: false);
+          await _darwinUrlPlugin.append(dir, [fileRelPath], isDir: false);
 
       setState(() {
         _output = 'Creating directory $fileAbsUrl';
