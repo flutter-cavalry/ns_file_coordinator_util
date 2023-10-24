@@ -7,7 +7,7 @@ class NsFileCoordinatorUtil {
   }
 
   /// Returns information about the given [url].
-  Future<NsFileCoordinatorEntity> stat(String url) async {
+  Future<NsFileCoordinatorEntity?> stat(String url) async {
     return NsFileCoordinatorUtilPlatform.instance.stat(url);
   }
 

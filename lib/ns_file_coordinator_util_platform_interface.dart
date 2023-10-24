@@ -66,7 +66,7 @@ abstract class NsFileCoordinatorUtilPlatform extends PlatformInterface {
     throw UnimplementedError('readFile() has not been implemented.');
   }
 
-  Future<NsFileCoordinatorEntity> stat(String url) async {
+  Future<NsFileCoordinatorEntity?> stat(String url) async {
     throw UnimplementedError('stat() has not been implemented.');
   }
 

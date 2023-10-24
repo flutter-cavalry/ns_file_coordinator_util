@@ -64,15 +64,9 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         
         var error: NSError? = nil
         NSFileCoordinator().coordinate(readingItemAt: srcURL, error: &error) { (url) in
-          do {
-            let statMap = try NsFileCoordinatorUtilPlugin.fsStat(url: srcURL)
-            DispatchQueue.main.async {
-              result(statMap)
-            }
-          } catch {
-            DispatchQueue.main.async {
-              result(FlutterError(code: "StatError", message: error.localizedDescription, details: nil))
-            }
+          let statMap = try? NsFileCoordinatorUtilPlugin.fsStat(url: srcURL)
+          DispatchQueue.main.async {
+            result(statMap)
           }
         }
         if let error = error {

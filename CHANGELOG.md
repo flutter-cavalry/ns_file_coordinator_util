@@ -1,3 +1,7 @@
+## 0.12.0
+
+- `stat` now returns null instead of throwing an exception if the file doesn't exist.
+
 ## 0.11.2
 
 - Make sure directory URLs always end with a trailing /.

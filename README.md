@@ -11,7 +11,7 @@ NOTE: this plugin doesn't automatically call `startAccessingSecurityScopedResour
 Future<void> readFile(String srcUrl, String destUrl);
 
 /// Returns information about the given [url].
-Future<NsFileCoordinatorEntity> stat(String url);
+Future<NsFileCoordinatorEntity?> stat(String url);
 
 /// Gets the contents of an iCloud directory [url] and returns an array of [NsFileCoordinatorEntity].
 ///
