@@ -77,7 +77,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
         
       case "stat":
-        guard let url = URL(string: args["path"] as! String) else {
+        guard let url = URL(string: args["url"] as! String) else {
           DispatchQueue.main.async {
             result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
           }
@@ -92,7 +92,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
         
       case "listContents":
-        guard let url = URL(string: args["path"] as! String) else {
+        guard let url = URL(string: args["url"] as! String) else {
           DispatchQueue.main.async {
             result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
           }
@@ -135,7 +135,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
         
       case "delete":
-        guard let url = URL(string: args["path"] as! String) else {
+        guard let url = URL(string: args["url"] as! String) else {
           DispatchQueue.main.async {
             result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
           }
@@ -193,7 +193,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
         
       case "isDirectory":
-        guard let url = URL(string: args["path"] as! String) else {
+        guard let url = URL(string: args["url"] as! String) else {
           DispatchQueue.main.async {
             result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
           }
@@ -209,7 +209,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
         
       case "mkdir":
-        guard let url = URL(string: args["path"] as! String) else {
+        guard let url = URL(string: args["url"] as! String) else {
           DispatchQueue.main.async {
             result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
           }
@@ -228,7 +228,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
         
       case "isEmptyDirectory":
-        guard let url = URL(string: args["path"] as! String) else {
+        guard let url = URL(string: args["url"] as! String) else {
           DispatchQueue.main.async {
             result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
           }
@@ -269,132 +269,109 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     if !scoped {
       return cb(url)
     }
-    return scopedAccess(url: url) { url in
-      var coordinatorErr: NSError? = nil
-      var res: ResultWrapper<T>?
-      NSFileCoordinator().coordinate(writingItemAt: url, options: .forDeleting, error: &coordinatorErr) { (url) in
-        res = cb(url)
-      }
-      
-      guard let res = res else {
-        return ResultWrapper<T>.createError(CustomError(errorMessage: "Unexpected nil res in scopedFSCallback"))
-      }
-      if res.error != nil {
-        return res
-      }
-      if let err = coordinatorErr {
-        return ResultWrapper<T>.createError(err)
-      }
+    var coordinatorErr: NSError? = nil
+    var res: ResultWrapper<T>?
+    NSFileCoordinator().coordinate(writingItemAt: url, options: .forDeleting, error: &coordinatorErr) { (url) in
+      res = cb(url)
+    }
+    
+    guard let res = res else {
+      return ResultWrapper<T>.createError(CustomError(errorMessage: "Unexpected nil res in scopedFSCallback"))
+    }
+    if res.error != nil {
       return res
     }
+    if let err = coordinatorErr {
+      return ResultWrapper<T>.createError(err)
+    }
+    return res
   }
   
   private static func scopedFSWriting<T>(scoped: Bool, url: URL, cb: (URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
     if !scoped {
       return cb(url)
     }
-    return scopedAccess(url: url) { url in
-      var coordinatorErr: NSError? = nil
-      var res: ResultWrapper<T>?
-      NSFileCoordinator().coordinate(writingItemAt: url, error: &coordinatorErr) { (url) in
-        res = cb(url)
-      }
-      
-      guard let res = res else {
-        return ResultWrapper<T>.createError(CustomError(errorMessage: "Unexpected nil res in scopedFSCallback"))
-      }
-      if res.error != nil {
-        return res
-      }
-      if let err = coordinatorErr {
-        return ResultWrapper<T>.createError(err)
-      }
+    var coordinatorErr: NSError? = nil
+    var res: ResultWrapper<T>?
+    NSFileCoordinator().coordinate(writingItemAt: url, error: &coordinatorErr) { (url) in
+      res = cb(url)
+    }
+    
+    guard let res = res else {
+      return ResultWrapper<T>.createError(CustomError(errorMessage: "Unexpected nil res in scopedFSCallback"))
+    }
+    if res.error != nil {
       return res
     }
+    if let err = coordinatorErr {
+      return ResultWrapper<T>.createError(err)
+    }
+    return res
   }
   
   private static func scopedFSReading<T>(scoped: Bool, url: URL, cb: (URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
     if !scoped {
       return cb(url)
     }
-    return scopedAccess(url: url) { url in
-      var coordinatorErr: NSError? = nil
-      var res: ResultWrapper<T>?
-      NSFileCoordinator().coordinate(readingItemAt: url, error: &coordinatorErr) { (url) in
-        res = cb(url)
-      }
-      
-      guard let res = res else {
-        return ResultWrapper<T>.createError(CustomError(errorMessage: "Unexpected nil res in scopedFSCallback"))
-      }
-      if res.error != nil {
-        return res
-      }
-      if let err = coordinatorErr {
-        return ResultWrapper<T>.createError(err)
-      }
+    var coordinatorErr: NSError? = nil
+    var res: ResultWrapper<T>?
+    NSFileCoordinator().coordinate(readingItemAt: url, error: &coordinatorErr) { (url) in
+      res = cb(url)
+    }
+    
+    guard let res = res else {
+      return ResultWrapper<T>.createError(CustomError(errorMessage: "Unexpected nil res in scopedFSCallback"))
+    }
+    if res.error != nil {
       return res
     }
+    if let err = coordinatorErr {
+      return ResultWrapper<T>.createError(err)
+    }
+    return res
   }
   
   private static func scopedFSReadingAndWriting<T>(scoped: Bool, src: URL, dest: URL, cb: (URL, URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
     if !scoped {
       return cb(src, dest)
     }
-    return scopedAccess(url: src) { url in
-      var coordinatorErr: NSError? = nil
-      var res: ResultWrapper<T>?
-      NSFileCoordinator().coordinate(readingItemAt: src, writingItemAt: dest, error: &coordinatorErr) { (src, dest) in
-        res = cb(src, dest)
-      }
-      
-      guard let res = res else {
-        return ResultWrapper<T>.createError(CustomError(errorMessage: "Unexpected nil res in scopedFSCallback"))
-      }
-      if res.error != nil {
-        return res
-      }
-      if let err = coordinatorErr {
-        return ResultWrapper<T>.createError(err)
-      }
+    var coordinatorErr: NSError? = nil
+    var res: ResultWrapper<T>?
+    NSFileCoordinator().coordinate(readingItemAt: src, writingItemAt: dest, error: &coordinatorErr) { (src, dest) in
+      res = cb(src, dest)
+    }
+    
+    guard let res = res else {
+      return ResultWrapper<T>.createError(CustomError(errorMessage: "Unexpected nil res in scopedFSCallback"))
+    }
+    if res.error != nil {
       return res
     }
+    if let err = coordinatorErr {
+      return ResultWrapper<T>.createError(err)
+    }
+    return res
   }
   
   private static func scopedFSMoving<T>(scoped: Bool, src: URL, dest: URL, cb: (URL, URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
     if !scoped {
       return cb(src, dest)
     }
-    return scopedAccess(url: src) { url in
-      var coordinatorErr: NSError? = nil
-      var res: ResultWrapper<T>?
-      NSFileCoordinator().coordinate(writingItemAt: src, options: .forMoving, writingItemAt: dest, options: .forReplacing, error: &coordinatorErr) { (src, dest) in
-        res = cb(src, dest)
-      }
-      
-      guard let res = res else {
-        return ResultWrapper<T>.createError(CustomError(errorMessage: "Unexpected nil res in scopedFSCallback"))
-      }
-      if res.error != nil {
-        return res
-      }
-      if let err = coordinatorErr {
-        return ResultWrapper<T>.createError(err)
-      }
-      return res
+    var coordinatorErr: NSError? = nil
+    var res: ResultWrapper<T>?
+    NSFileCoordinator().coordinate(writingItemAt: src, options: .forMoving, writingItemAt: dest, options: .forReplacing, error: &coordinatorErr) { (src, dest) in
+      res = cb(src, dest)
     }
-  }
-  
-  private static func scopedAccess<T>(url: URL, cb: (URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
-    let granted = url.startAccessingSecurityScopedResource()
-    let res = cb(url)
-    if (granted) {
-      url.stopAccessingSecurityScopedResource()
+    
+    guard let res = res else {
+      return ResultWrapper<T>.createError(CustomError(errorMessage: "Unexpected nil res in scopedFSCallback"))
     }
     if res.error != nil {
       return res
     }
-    // Now we can return the `ResultWrapper`.
+    if let err = coordinatorErr {
+      return ResultWrapper<T>.createError(err)
+    }
     return res
   }
   

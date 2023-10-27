@@ -62,40 +62,41 @@ abstract class NsFileCoordinatorUtilPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<void> readFile(String srcUrl, String destUrl) {
+  Future<void> readFile(String srcUrl, String destUrl, {bool scoped = true}) {
     throw UnimplementedError('readFile() has not been implemented.');
   }
 
-  Future<NsFileCoordinatorEntity?> stat(String url) async {
+  Future<NsFileCoordinatorEntity?> stat(String url,
+      {bool scoped = true}) async {
     throw UnimplementedError('stat() has not been implemented.');
   }
 
   Future<List<NsFileCoordinatorEntity>> listContents(String url,
-      {bool? recursive, bool? filesOnly}) async {
+      {bool? recursive, bool? filesOnly, bool scoped = true}) async {
     throw UnimplementedError('listContents() has not been implemented.');
   }
 
-  Future<void> delete(String url) async {
+  Future<void> delete(String url, {bool scoped = true}) async {
     throw UnimplementedError('delete() has not been implemented.');
   }
 
-  Future<void> move(String srcUrl, String destUrl) {
+  Future<void> move(String srcUrl, String destUrl, {bool scoped = true}) {
     throw UnimplementedError('move() has not been implemented.');
   }
 
-  Future<void> copy(String srcUrl, String destUrl) {
+  Future<void> copy(String srcUrl, String destUrl, {bool scoped = true}) {
     throw UnimplementedError('copy() has not been implemented.');
   }
 
-  Future<bool?> isDirectory(String url) async {
+  Future<bool?> isDirectory(String url, {bool scoped = true}) async {
     throw UnimplementedError('isDirectory() has not been implemented.');
   }
 
-  Future<void> mkdir(String url) async {
+  Future<void> mkdir(String url, {bool scoped = true}) async {
     throw UnimplementedError('mkdir() has not been implemented.');
   }
 
-  Future<bool> isEmptyDirectory(String url) async {
+  Future<bool> isEmptyDirectory(String url, {bool scoped = true}) async {
     throw UnimplementedError('isEmptyDirectory() has not been implemented.');
   }
 }

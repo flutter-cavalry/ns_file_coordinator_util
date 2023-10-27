@@ -38,7 +38,6 @@ class MyHome extends StatefulWidget {
 }
 
 class _MyHomeState extends State<MyHome> {
-  String? _icloudFolder;
   final _plugin = NsFileCoordinatorUtil();
   final _macosPicker = MacosFilePicker();
   final _iosPicker = IosDocumentPicker();
@@ -47,6 +46,7 @@ class _MyHomeState extends State<MyHome> {
 
   late TextEditingController _fileTextController;
   String _output = '';
+  String? _icloudFolder;
 
   @override
   void initState() {
@@ -182,7 +182,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Reading/downloading $dir';
       });
-      await _plugin.readFile(fileAbsUrl, destUrl);
+      await _plugin.readFile(fileAbsUrl, destUrl, scoped: true);
 
       var length = await File(destPath).length();
       setState(() {
@@ -205,7 +205,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Listing contents of $dir';
       });
-      var contents = await _plugin.listContents(dir);
+      var contents = await _plugin.listContents(dir, scoped: true);
       setState(() {
         _output = '--- Contents ---\n${contents.join('\n')}';
       });
@@ -230,7 +230,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Getting information of $dir';
       });
-      var info = await _plugin.stat(fileAbsUrl);
+      var info = await _plugin.stat(fileAbsUrl, scoped: true);
       setState(() {
         _output = info == null ? '<NULL>' : info.fullDescription();
       });
@@ -255,7 +255,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Deleting $dir';
       });
-      await _plugin.delete(fileAbsUrl);
+      await _plugin.delete(fileAbsUrl, scoped: true);
       setState(() {
         _output = 'Deleted';
       });
@@ -282,7 +282,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Rename $fileAbsUrl to $newFileAbsUrl';
       });
-      await _plugin.move(fileAbsUrl, newFileAbsUrl);
+      await _plugin.move(fileAbsUrl, newFileAbsUrl, scoped: true);
       setState(() {
         _output = 'Renamed';
       });
@@ -309,7 +309,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Writing to $fileAbsUrl';
       });
-      await _plugin.copy(tmpDirUrl, fileAbsUrl);
+      await _plugin.copy(tmpDirUrl, fileAbsUrl, scoped: true);
       setState(() {
         _output = 'Succeeded';
       });
@@ -334,7 +334,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Checking if $fileAbsUrl exists';
       });
-      var isDir = await _plugin.isDirectory(fileAbsUrl);
+      var isDir = await _plugin.isDirectory(fileAbsUrl, scoped: true);
       setState(() {
         if (isDir == null) {
           _output = 'Not found';
@@ -363,7 +363,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Creating directory $fileAbsUrl';
       });
-      await _plugin.mkdir(fileAbsUrl);
+      await _plugin.mkdir(fileAbsUrl, scoped: true);
       setState(() {
         _output = 'Created';
       });

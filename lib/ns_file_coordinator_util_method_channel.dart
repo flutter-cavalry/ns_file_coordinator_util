@@ -10,15 +10,20 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
   final methodChannel = const MethodChannel('ns_file_coordinator_util');
 
   @override
-  Future<void> readFile(String srcUrl, String destUrl) async {
-    await methodChannel.invokeMethod<void>(
-        'readFile', {'src': srcUrl.toString(), 'dest': destUrl.toString()});
+  Future<void> readFile(String srcUrl, String destUrl,
+      {bool scoped = true}) async {
+    await methodChannel.invokeMethod<void>('readFile', {
+      'src': srcUrl.toString(),
+      'dest': destUrl.toString(),
+      'scoped': scoped,
+    });
   }
 
   @override
-  Future<NsFileCoordinatorEntity?> stat(String url) async {
-    var map = await methodChannel
-        .invokeMapMethod<dynamic, dynamic>('stat', {'path': url.toString()});
+  Future<NsFileCoordinatorEntity?> stat(String url,
+      {bool scoped = true}) async {
+    var map = await methodChannel.invokeMapMethod<dynamic, dynamic>(
+        'stat', {'url': url.toString(), 'scoped': scoped});
     if (map == null) {
       return null;
     }
@@ -27,12 +32,13 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
 
   @override
   Future<List<NsFileCoordinatorEntity>> listContents(String url,
-      {bool? recursive, bool? filesOnly}) async {
+      {bool? recursive, bool? filesOnly, bool scoped = true}) async {
     var entityMaps = await methodChannel
         .invokeListMethod<Map<dynamic, dynamic>>('listContents', {
-      'path': url.toString(),
+      'url': url.toString(),
       'recursive': recursive,
-      'filesOnly': filesOnly
+      'filesOnly': filesOnly,
+      'scoped': scoped
     });
     if (entityMaps == null) {
       return [];
@@ -41,37 +47,45 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
   }
 
   @override
-  Future<void> delete(String url) async {
-    await methodChannel.invokeMethod<void>('delete', {'path': url.toString()});
-  }
-
-  @override
-  Future<void> move(String srcUrl, String destUrl) async {
+  Future<void> delete(String url, {bool scoped = true}) async {
     await methodChannel.invokeMethod<void>(
-        'move', {'src': srcUrl.toString(), 'dest': destUrl.toString()});
+        'delete', {'url': url.toString(), 'scoped': scoped});
   }
 
   @override
-  Future<void> copy(String srcUrl, String destUrl) async {
-    await methodChannel.invokeMethod<void>(
-        'copy', {'src': srcUrl.toString(), 'dest': destUrl.toString()});
+  Future<void> move(String srcUrl, String destUrl, {bool scoped = true}) async {
+    await methodChannel.invokeMethod<void>('move', {
+      'src': srcUrl.toString(),
+      'dest': destUrl.toString(),
+      'scoped': scoped
+    });
   }
 
   @override
-  Future<bool?> isDirectory(String url) async {
-    return await methodChannel
-        .invokeMethod<bool>('isDirectory', {'path': url.toString()});
+  Future<void> copy(String srcUrl, String destUrl, {bool scoped = true}) async {
+    await methodChannel.invokeMethod<void>('copy', {
+      'src': srcUrl.toString(),
+      'dest': destUrl.toString(),
+      'scoped': scoped
+    });
   }
 
   @override
-  Future<void> mkdir(String url) async {
-    await methodChannel.invokeMethod<void>('mkdir', {'path': url.toString()});
+  Future<bool?> isDirectory(String url, {bool scoped = true}) async {
+    return await methodChannel.invokeMethod<bool>(
+        'isDirectory', {'url': url.toString(), 'scoped': scoped});
   }
 
   @override
-  Future<bool> isEmptyDirectory(String url) async {
-    return await methodChannel
-            .invokeMethod<bool>('isEmptyDirectory', {'path': url.toString()}) ??
+  Future<void> mkdir(String url, {bool scoped = true}) async {
+    await methodChannel
+        .invokeMethod<void>('mkdir', {'url': url.toString(), 'scoped': scoped});
+  }
+
+  @override
+  Future<bool> isEmptyDirectory(String url, {bool scoped = true}) async {
+    return await methodChannel.invokeMethod<bool>(
+            'isEmptyDirectory', {'url': url.toString(), 'scoped': scoped}) ??
         false;
   }
 }
