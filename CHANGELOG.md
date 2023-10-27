@@ -1,3 +1,7 @@
+## 0.13.0
+
+- Allow users to opt out of coordinator by using the `scope` parameter.
+
 ## 0.12.0
 
 - `stat` now returns null instead of throwing an exception if the file doesn't exist.
