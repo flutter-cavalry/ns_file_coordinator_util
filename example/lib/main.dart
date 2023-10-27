@@ -2,7 +2,6 @@
 
 import 'dart:io';
 
-import 'package:accessing_security_scoped_resource/accessing_security_scoped_resource.dart';
 import 'package:darwin_url/darwin_url.dart';
 import 'package:flutter/material.dart';
 import 'package:ios_document_picker/ios_document_picker.dart';
@@ -42,7 +41,6 @@ class _MyHomeState extends State<MyHome> {
   final _plugin = NsFileCoordinatorUtil();
   final _macosPicker = MacosFilePicker();
   final _iosPicker = IosDocumentPicker();
-  final _accessPlugin = AccessingSecurityScopedResource();
   final _darwinUrlPlugin = DarwinUrl();
 
   late TextEditingController _fileTextController;
@@ -152,12 +150,6 @@ class _MyHomeState extends State<MyHome> {
       }
       if (dirUrl == null) {
         return;
-      }
-
-      var hasAccess = await _accessPlugin
-          .startAccessingSecurityScopedResourceWithURL(dirUrl);
-      if (!hasAccess) {
-        throw 'Failed to gain access to $dirUrl';
       }
       setState(() {
         _icloudFolder = dirUrl;
