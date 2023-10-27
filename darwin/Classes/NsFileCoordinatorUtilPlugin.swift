@@ -6,6 +6,36 @@ import Flutter
 import FlutterMacOS
 #endif
 
+struct CustomError: Error, LocalizedError {
+  let errorMessage: String
+  
+  var errorDescription: String? {
+    return errorMessage
+  }
+  
+  init(errorMessage: String) {
+    self.errorMessage = errorMessage
+  }
+}
+
+class ResultWrapper<T> {
+  let result: T?
+  let error: Error?
+  
+  private init(result: T? = nil, error: Error? = nil) {
+    self.result = result
+    self.error = error
+  }
+  
+  static func createResult(_ result: T) -> ResultWrapper {
+    return ResultWrapper(result: result)
+  }
+  
+  static func createError(_ error: Error) -> ResultWrapper {
+    return ResultWrapper(error: error)
+  }
+}
+
 public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
   static let fsResourceKeys: [URLResourceKey] = [.nameKey, .fileSizeKey, .isDirectoryKey, .contentModificationDateKey]
   
@@ -28,77 +58,63 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     DispatchQueue.global().async {
       switch call.method {
       case "readFile":
-        guard let srcURL = URL(string: args["src"] as! String), let destURL = URL(string: args["dest"] as! String) else {
+        guard let url = URL(string: args["src"] as! String), let destURL = URL(string: args["dest"] as! String) else {
           DispatchQueue.main.async {
             result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
           }
           return
         }
+        let scoped = args["scoped"] as? Bool ?? false
         
-        var error: NSError? = nil
-        NSFileCoordinator().coordinate(readingItemAt: srcURL, error: &error) { (url) in
+        let res = NsFileCoordinatorUtilPlugin.scopedFSReading(scoped: scoped, url: url) { url in
           do {
-            try FileManager.default.copyItem(at: srcURL, to: destURL)
-            DispatchQueue.main.async {
-              result(nil)
-            }
+            try FileManager.default.copyItem(at: url, to: destURL)
+            return ResultWrapper.createResult(true)
           } catch {
-            DispatchQueue.main.async {
-              result(FlutterError(code: "ReadFileError", message: error.localizedDescription, details: nil))
-            }
+            return ResultWrapper.createError(error)
           }
         }
-        if let error = error {
-          DispatchQueue.main.async {
-            result(FlutterError(code: "NSFileCoordinatorError", message: error.localizedDescription, details: nil))
-          }
-        }
+        NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
         
       case "stat":
-        guard let srcURL = URL(string: args["path"] as! String) else {
+        guard let url = URL(string: args["path"] as! String) else {
           DispatchQueue.main.async {
             result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
           }
           return
         }
+        let scoped = args["scoped"] as? Bool ?? false
         
-        var error: NSError? = nil
-        NSFileCoordinator().coordinate(readingItemAt: srcURL, error: &error) { (url) in
-          let statMap = try? NsFileCoordinatorUtilPlugin.fsStat(url: srcURL)
-          DispatchQueue.main.async {
-            result(statMap)
-          }
+        let res = NsFileCoordinatorUtilPlugin.scopedFSReading(scoped: scoped, url: url) { url in
+          let statMap = try? NsFileCoordinatorUtilPlugin.fsStat(url: url)
+          return ResultWrapper.createResult(statMap)
         }
-        if let error = error {
-          DispatchQueue.main.async {
-            result(FlutterError(code: "NSFileCoordinatorError", message: error.localizedDescription, details: nil))
-          }
-        }
+        NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
         
       case "listContents":
-        guard let srcURL = URL(string: args["path"] as! String) else {
+        guard let url = URL(string: args["path"] as! String) else {
           DispatchQueue.main.async {
             result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
           }
           return
         }
+        let scoped = args["scoped"] as? Bool ?? false
         let recursive = args["recursive"] as? Bool ?? false
         let filesOnly = args["filesOnly"] as? Bool ?? false
         
-        var error: NSError? = nil
-        NSFileCoordinator().coordinate(readingItemAt: srcURL, error: &error) { (url) in
+        let res = NsFileCoordinatorUtilPlugin.scopedFSReading(scoped: scoped, url: url) { url in
           do {
             var contentURLs: [URL]
             if recursive {
               var urls = [URL]()
               if let enumerator = FileManager.default.enumerator(at: url, includingPropertiesForKeys: NsFileCoordinatorUtilPlugin.fsResourceKeys) {
-                  for case let fileURL as URL in enumerator {
-                    urls.append(fileURL)
-                  }
+                for case let fileURL as URL in enumerator {
+                  urls.append(fileURL)
+                }
               }
               contentURLs = urls
             } else {
-              contentURLs = try FileManager.default.contentsOfDirectory(at: srcURL, includingPropertiesForKeys: NsFileCoordinatorUtilPlugin.fsResourceKeys)
+              contentURLs = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: NsFileCoordinatorUtilPlugin.fsResourceKeys)
             }
             
             if (filesOnly) {
@@ -111,47 +127,31 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
                 try statMaps.append(NsFileCoordinatorUtilPlugin.fsStat(url: fileURL))
               } catch { print(error, fileURL) }
             }
-            DispatchQueue.main.async {
-              result(statMaps)
-            }
+            return ResultWrapper.createResult(statMaps)
           } catch {
-            DispatchQueue.main.async {
-              result(FlutterError(code: "ListContentError", message: error.localizedDescription, details: nil))
-            }
+            return ResultWrapper.createError(error)
           }
         }
-        if let error = error {
-          DispatchQueue.main.async {
-            result(FlutterError(code: "NSFileCoordinatorError", message: error.localizedDescription, details: nil))
-          }
-        }
+        NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
         
       case "delete":
-        guard let srcURL = URL(string: args["path"] as! String) else {
+        guard let url = URL(string: args["path"] as! String) else {
           DispatchQueue.main.async {
             result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
           }
           return
         }
+        let scoped = args["scoped"] as? Bool ?? false
         
-        var error: NSError? = nil
-        NSFileCoordinator().coordinate(writingItemAt: srcURL, options: .forDeleting, error: &error) { (url) in
+        let res = NsFileCoordinatorUtilPlugin.scopedFSDeleting(scoped: scoped, url: url) { url in
           do {
-            try FileManager.default.removeItem(at: srcURL)
-            DispatchQueue.main.async {
-              result(nil)
-            }
+            try FileManager.default.removeItem(at: url)
+            return ResultWrapper.createResult(true)
           } catch {
-            DispatchQueue.main.async {
-              result(FlutterError(code: "DeleteError", message: error.localizedDescription, details: nil))
-            }
+            return ResultWrapper.createError(error)
           }
         }
-        if let error = error {
-          DispatchQueue.main.async {
-            result(FlutterError(code: "NSFileCoordinatorError", message: error.localizedDescription, details: nil))
-          }
-        }
+        NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
         
       case "move":
         guard let srcURL = URL(string: args["src"] as! String), let destURL = URL(string: args["dest"] as! String) else {
@@ -160,25 +160,17 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           }
           return
         }
+        let scoped = args["scoped"] as? Bool ?? false
         
-        var error: NSError? = nil
-        NSFileCoordinator().coordinate(writingItemAt: srcURL, options: .forMoving, writingItemAt: destURL, options: .forReplacing, error: &error) { srcURL, destURL in
+        let res = NsFileCoordinatorUtilPlugin.scopedFSMoving(scoped: scoped, src: srcURL, dest: destURL) { srcURL, destURL in
           do {
             try FileManager.default.moveItem(at: srcURL, to: destURL)
-            DispatchQueue.main.async {
-              result(nil)
-            }
+            return ResultWrapper.createResult(true)
           } catch {
-            DispatchQueue.main.async {
-              result(FlutterError(code: "MoveError", message: error.localizedDescription, details: nil))
-            }
+            return ResultWrapper.createError(error)
           }
         }
-        if let error = error {
-          DispatchQueue.main.async {
-            result(FlutterError(code: "NSFileCoordinatorError", message: error.localizedDescription, details: nil))
-          }
-        }
+        NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
         
       case "copy":
         guard let srcURL = URL(string: args["src"] as! String), let destURL = URL(string: args["dest"] as! String) else {
@@ -187,104 +179,73 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           }
           return
         }
+        let scoped = args["scoped"] as? Bool ?? false
         
-        var error: NSError? = nil
-        NSFileCoordinator().coordinate(readingItemAt: srcURL, writingItemAt: destURL, error: &error) { srcURL, destURL in
+        let res = NsFileCoordinatorUtilPlugin.scopedFSReadingAndWriting(scoped: scoped, src: srcURL, dest: destURL) { srcURL, destURL in
           do {
             try FileManager.default.createDirectory(at: destURL.deletingLastPathComponent(), withIntermediateDirectories: true)
             try FileManager.default.copyItem(at: srcURL, to: destURL)
-            DispatchQueue.main.async {
-              result(nil)
-            }
+            return ResultWrapper.createResult(true)
           } catch {
-            DispatchQueue.main.async {
-              result(FlutterError(code: "CopyFileError", message: error.localizedDescription, details: nil))
-            }
+            return ResultWrapper.createError(error)
           }
         }
-        if let error = error {
-          DispatchQueue.main.async {
-            result(FlutterError(code: "NSFileCoordinatorError", message: error.localizedDescription, details: nil))
-          }
-        }
-        
+        NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
         
       case "isDirectory":
-        guard let srcURL = URL(string: args["path"] as! String) else {
+        guard let url = URL(string: args["path"] as! String) else {
           DispatchQueue.main.async {
             result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
           }
           return
         }
+        let scoped = args["scoped"] as? Bool ?? false
         
-        var error: NSError? = nil
-        NSFileCoordinator().coordinate(readingItemAt: srcURL, error: &error) { (url) in
+        let res = NsFileCoordinatorUtilPlugin.scopedFSReading(scoped: scoped, url: url) { url in
           var isDirectory: ObjCBool = false
-          let exists = FileManager.default.fileExists(atPath: srcURL.path, isDirectory: &isDirectory)
-          DispatchQueue.main.async {
-            result(exists ? isDirectory.boolValue : nil)
-          }
+          let exists = FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory)
+          return ResultWrapper.createResult(exists ? isDirectory.boolValue : nil)
         }
-        if let error = error {
-          DispatchQueue.main.async {
-            result(FlutterError(code: "NSFileCoordinatorError", message: error.localizedDescription, details: nil))
-          }
-        }
+        NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
         
       case "mkdir":
-        guard let srcURL = URL(string: args["path"] as! String) else {
+        guard let url = URL(string: args["path"] as! String) else {
           DispatchQueue.main.async {
             result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
           }
           return
         }
+        let scoped = args["scoped"] as? Bool ?? false
         
-        var error: NSError? = nil
-        NSFileCoordinator().coordinate(writingItemAt: srcURL, error: &error) { destURL in
+        let res = NsFileCoordinatorUtilPlugin.scopedFSWriting(scoped: scoped, url: url) { url in
           do {
-            try FileManager.default.createDirectory(at: srcURL, withIntermediateDirectories: true)
-            DispatchQueue.main.async {
-              result(nil)
-            }
+            try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+            return ResultWrapper.createResult(true)
           } catch {
-            DispatchQueue.main.async {
-              result(FlutterError(code: "MkdirError", message: error.localizedDescription, details: nil))
-            }
+            return ResultWrapper.createError(error)
           }
         }
-        if let error = error {
-          DispatchQueue.main.async {
-            result(FlutterError(code: "NSFileCoordinatorError", message: error.localizedDescription, details: nil))
-          }
-        }
+        NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
         
       case "isEmptyDirectory":
-        guard let srcURL = URL(string: args["path"] as! String) else {
+        guard let url = URL(string: args["path"] as! String) else {
           DispatchQueue.main.async {
             result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
           }
           return
         }
+        let scoped = args["scoped"] as? Bool ?? false
         
-        var error: NSError? = nil
-        NSFileCoordinator().coordinate(readingItemAt: srcURL, error: &error) { (url) in
+        let res = NsFileCoordinatorUtilPlugin.scopedFSReading(scoped: scoped, url: url, cb: { url in
           do {
-            let contentURLs = try FileManager.default.contentsOfDirectory(at: srcURL, includingPropertiesForKeys: [])
+            let contentURLs = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: [])
             let isEmpty = contentURLs.count == 0
-            DispatchQueue.main.async {
-              result(isEmpty)
-            }
+            return ResultWrapper.createResult(isEmpty)
           } catch {
-            DispatchQueue.main.async {
-              result(FlutterError(code: "ListContentError", message: error.localizedDescription, details: nil))
-            }
+            return ResultWrapper.createError(error)
           }
-        }
-        if let error = error {
-          DispatchQueue.main.async {
-            result(FlutterError(code: "NSFileCoordinatorError", message: error.localizedDescription, details: nil))
-          }
-        }
+        })
+        NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
         
       default:
         DispatchQueue.main.async {
@@ -292,6 +253,149 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         }
       }
     }
+  }
+  
+  private static func reportResult<T>(result: @escaping FlutterResult, data: ResultWrapper<T>) {
+    DispatchQueue.main.async {
+      if let err = data.error {
+        result(FlutterError(code: "PluginError", message: err.localizedDescription, details: nil))
+      } else {
+        result(data.result!)
+      }
+    }
+  }
+  
+  private static func scopedFSDeleting<T>(scoped: Bool, url: URL, cb: (URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
+    if !scoped {
+      return cb(url)
+    }
+    return scopedAccess(url: url) { url in
+      var coordinatorErr: NSError? = nil
+      var res: ResultWrapper<T>?
+      NSFileCoordinator().coordinate(writingItemAt: url, options: .forDeleting, error: &coordinatorErr) { (url) in
+        res = cb(url)
+      }
+      
+      guard let res = res else {
+        return ResultWrapper<T>.createError(CustomError(errorMessage: "Unexpected nil res in scopedFSCallback"))
+      }
+      if res.error != nil {
+        return res
+      }
+      if let err = coordinatorErr {
+        return ResultWrapper<T>.createError(err)
+      }
+      return res
+    }
+  }
+  
+  private static func scopedFSWriting<T>(scoped: Bool, url: URL, cb: (URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
+    if !scoped {
+      return cb(url)
+    }
+    return scopedAccess(url: url) { url in
+      var coordinatorErr: NSError? = nil
+      var res: ResultWrapper<T>?
+      NSFileCoordinator().coordinate(writingItemAt: url, error: &coordinatorErr) { (url) in
+        res = cb(url)
+      }
+      
+      guard let res = res else {
+        return ResultWrapper<T>.createError(CustomError(errorMessage: "Unexpected nil res in scopedFSCallback"))
+      }
+      if res.error != nil {
+        return res
+      }
+      if let err = coordinatorErr {
+        return ResultWrapper<T>.createError(err)
+      }
+      return res
+    }
+  }
+  
+  private static func scopedFSReading<T>(scoped: Bool, url: URL, cb: (URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
+    if !scoped {
+      return cb(url)
+    }
+    return scopedAccess(url: url) { url in
+      var coordinatorErr: NSError? = nil
+      var res: ResultWrapper<T>?
+      NSFileCoordinator().coordinate(readingItemAt: url, error: &coordinatorErr) { (url) in
+        res = cb(url)
+      }
+      
+      guard let res = res else {
+        return ResultWrapper<T>.createError(CustomError(errorMessage: "Unexpected nil res in scopedFSCallback"))
+      }
+      if res.error != nil {
+        return res
+      }
+      if let err = coordinatorErr {
+        return ResultWrapper<T>.createError(err)
+      }
+      return res
+    }
+  }
+  
+  private static func scopedFSReadingAndWriting<T>(scoped: Bool, src: URL, dest: URL, cb: (URL, URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
+    if !scoped {
+      return cb(src, dest)
+    }
+    return scopedAccess(url: src) { url in
+      var coordinatorErr: NSError? = nil
+      var res: ResultWrapper<T>?
+      NSFileCoordinator().coordinate(readingItemAt: src, writingItemAt: dest, error: &coordinatorErr) { (src, dest) in
+        res = cb(src, dest)
+      }
+      
+      guard let res = res else {
+        return ResultWrapper<T>.createError(CustomError(errorMessage: "Unexpected nil res in scopedFSCallback"))
+      }
+      if res.error != nil {
+        return res
+      }
+      if let err = coordinatorErr {
+        return ResultWrapper<T>.createError(err)
+      }
+      return res
+    }
+  }
+  
+  private static func scopedFSMoving<T>(scoped: Bool, src: URL, dest: URL, cb: (URL, URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
+    if !scoped {
+      return cb(src, dest)
+    }
+    return scopedAccess(url: src) { url in
+      var coordinatorErr: NSError? = nil
+      var res: ResultWrapper<T>?
+      NSFileCoordinator().coordinate(writingItemAt: src, options: .forMoving, writingItemAt: dest, options: .forReplacing, error: &coordinatorErr) { (src, dest) in
+        res = cb(src, dest)
+      }
+      
+      guard let res = res else {
+        return ResultWrapper<T>.createError(CustomError(errorMessage: "Unexpected nil res in scopedFSCallback"))
+      }
+      if res.error != nil {
+        return res
+      }
+      if let err = coordinatorErr {
+        return ResultWrapper<T>.createError(err)
+      }
+      return res
+    }
+  }
+  
+  private static func scopedAccess<T>(url: URL, cb: (URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
+    let granted = url.startAccessingSecurityScopedResource()
+    let res = cb(url)
+    if (granted) {
+      url.stopAccessingSecurityScopedResource()
+    }
+    if res.error != nil {
+      return res
+    }
+    // Now we can return the `ResultWrapper`.
+    return res
   }
   
   private static func fsStat(url: URL) throws -> [String: Any?] {
