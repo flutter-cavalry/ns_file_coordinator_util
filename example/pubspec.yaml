@@ -29,6 +29,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   tmp_path: ^1.0.2
+  accessing_security_scoped_resource: ^2.0.0
   macos_file_picker: ^0.3.0
   path: ^1.8.2
   ios_document_picker: ^0.0.1
