@@ -1,3 +1,7 @@
+## 0.14.0
+
+- Add `relativePathInfo` to `listContents` to return relative path information.
+
 ## 0.13.0
 
 - Allow users to opt out of coordinator by using the `scope` parameter.

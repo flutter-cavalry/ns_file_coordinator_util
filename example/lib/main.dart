@@ -117,7 +117,13 @@ class _MyHomeState extends State<MyHome> {
       _sep(),
       OutlinedButton(onPressed: _stat, child: const Text('Get information')),
       _sep(),
-      OutlinedButton(onPressed: _list, child: const Text('List contents')),
+      OutlinedButton(
+          onPressed: () => _list(recursive: false),
+          child: const Text('List contents')),
+      _sep(),
+      OutlinedButton(
+          onPressed: () => _list(recursive: true),
+          child: const Text('List contents recursively')),
       _sep(),
       OutlinedButton(onPressed: _delete, child: const Text('Delete')),
       _sep(),
@@ -196,7 +202,7 @@ class _MyHomeState extends State<MyHome> {
     }
   }
 
-  Future<void> _list() async {
+  Future<void> _list({required bool recursive}) async {
     try {
       var dir = _icloudFolder;
       if (dir == null) {
@@ -205,7 +211,8 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Listing contents of $dir';
       });
-      var contents = await _plugin.listContents(dir, scoped: true);
+      var contents = await _plugin.listContents(dir,
+          scoped: true, recursive: recursive, relativePathInfo: true);
       setState(() {
         _output = '--- Contents ---\n${contents.join('\n')}';
       });

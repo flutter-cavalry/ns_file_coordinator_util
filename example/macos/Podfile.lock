@@ -36,8 +36,8 @@ SPEC CHECKSUMS:
   darwin_url: a6439fcef7fdfdd19ac9f7aa4ffed427d98b1da3
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   macos_file_picker: 9ae907f5f69a352afc8fb44e8a80bb180f9267d5
-  ns_file_coordinator_util: 4cf31ac1d10428abccef48fc74ada68c5693c98b
+  ns_file_coordinator_util: 3577b3bb512fd6e66d94b978b6f64d6521deab3e
 
-PODFILE CHECKSUM: 353c8bcc5d5b0994e508d035b5431cfe18c1dea7
+PODFILE CHECKSUM: 0d3963a09fc94f580682bd88480486da345dc3f0
 
 COCOAPODS: 1.15.2

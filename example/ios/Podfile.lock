@@ -34,10 +34,10 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   accessing_security_scoped_resource: 5328c9963fc8873d1b60650ff42101847d3ff0ea
   darwin_url: a6439fcef7fdfdd19ac9f7aa4ffed427d98b1da3
-  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   ios_document_picker: d9bc7b50a43cfdb63aa6ee25ef21f0a8de50690c
-  ns_file_coordinator_util: 4cf31ac1d10428abccef48fc74ada68c5693c98b
+  ns_file_coordinator_util: 3577b3bb512fd6e66d94b978b6f64d6521deab3e
 
 PODFILE CHECKSUM: 775997f741c536251164e3eacf6e34abf2eb7a17
 
-COCOAPODS: 1.13.0
+COCOAPODS: 1.15.2

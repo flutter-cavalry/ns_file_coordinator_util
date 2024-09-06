@@ -17,10 +17,17 @@ class NsFileCoordinatorUtil {
   ///
   /// [recursive] whether to list subdirectories recursively.
   /// [filesOnly] return files only.
+  /// [relativePathInfo] return relative path info.
   Future<List<NsFileCoordinatorEntity>> listContents(String url,
-      {bool? recursive, bool? filesOnly, bool scoped = true}) async {
+      {bool? recursive,
+      bool? filesOnly,
+      bool scoped = true,
+      bool? relativePathInfo}) async {
     return NsFileCoordinatorUtilPlatform.instance.listContents(url,
-        recursive: recursive, filesOnly: filesOnly, scoped: scoped);
+        recursive: recursive,
+        filesOnly: filesOnly,
+        scoped: scoped,
+        relativePathInfo: relativePathInfo);
   }
 
   /// Deletes the given iCloud [url].

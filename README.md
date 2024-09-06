@@ -17,8 +17,12 @@ Future<NsFileCoordinatorEntity?> stat(String url);
 ///
 /// [recursive] whether to list subdirectories recursively.
 /// [filesOnly] return files only.
+/// [relativePathInfo] return relative path info.
 Future<List<NsFileCoordinatorEntity>> listContents(String url,
-    {bool? recursive, bool? filesOnly});
+    {bool? recursive,
+    bool? filesOnly,
+    bool scoped = true,
+    bool? relativePathInfo});
 
 /// Deletes the given iCloud [url].
 Future<void> delete(String url);

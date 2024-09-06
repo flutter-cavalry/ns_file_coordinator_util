@@ -8,6 +8,7 @@ class NsFileCoordinatorEntity {
   final bool isDir;
   final int length;
   late final DateTime? lastMod;
+  late final String? relativePath;
 
   NsFileCoordinatorEntity(this.url, this.name, this.isDir, this.length);
 
@@ -19,6 +20,14 @@ class NsFileCoordinatorEntity {
     var lastModTimestamp = json['lastMod'] as int?;
     if (lastModTimestamp != null) {
       lastMod = DateTime.fromMillisecondsSinceEpoch(lastModTimestamp * 1000);
+    } else {
+      lastMod = null;
+    }
+    var relativePath = json['relativePath'] as String?;
+    if (relativePath != null) {
+      this.relativePath = relativePath;
+    } else {
+      this.relativePath = null;
     }
   }
 
@@ -28,6 +37,9 @@ class NsFileCoordinatorEntity {
     if (lastMod != null) {
       s += '|${lastMod.toString()}';
     }
+    if (relativePath != null) {
+      s += '|[REL]$relativePath';
+    }
     return s;
   }
 
@@ -35,6 +47,9 @@ class NsFileCoordinatorEntity {
     var s = 'url: $url\nname: $name\nisDir: $isDir\nlength: $length';
     if (lastMod != null) {
       s += '\nlastMod: ${lastMod.toString()}';
+    }
+    if (relativePath != null) {
+      s += '\nrelativePath: $relativePath';
     }
     return s;
   }
@@ -72,7 +87,10 @@ abstract class NsFileCoordinatorUtilPlatform extends PlatformInterface {
   }
 
   Future<List<NsFileCoordinatorEntity>> listContents(String url,
-      {bool? recursive, bool? filesOnly, bool scoped = true}) async {
+      {bool? recursive,
+      bool? filesOnly,
+      bool scoped = true,
+      bool? relativePathInfo}) async {
     throw UnimplementedError('listContents() has not been implemented.');
   }
 

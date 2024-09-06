@@ -86,7 +86,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         let scoped = args["scoped"] as? Bool ?? false
         
         let res = NsFileCoordinatorUtilPlugin.scopedFSReading(scoped: scoped, url: url) { url in
-          let statMap = try? NsFileCoordinatorUtilPlugin.fsStat(url: url)
+          let statMap = try? NsFileCoordinatorUtilPlugin.fsStat(url: url, relativePath: false)
           return ResultWrapper.createResult(statMap)
         }
         NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
@@ -101,13 +101,14 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         let scoped = args["scoped"] as? Bool ?? false
         let recursive = args["recursive"] as? Bool ?? false
         let filesOnly = args["filesOnly"] as? Bool ?? false
+        let relativePathInfo = args["relativePathInfo"] as? Bool ?? false
         
         let res = NsFileCoordinatorUtilPlugin.scopedFSReading(scoped: scoped, url: url) { url in
           do {
             var contentURLs: [URL]
             if recursive {
               var urls = [URL]()
-              if let enumerator = FileManager.default.enumerator(at: url, includingPropertiesForKeys: NsFileCoordinatorUtilPlugin.fsResourceKeys) {
+              if let enumerator = FileManager.default.enumerator(at: url, includingPropertiesForKeys: NsFileCoordinatorUtilPlugin.fsResourceKeys, options: relativePathInfo ? [.producesRelativePathURLs] : []) {
                 for case let fileURL as URL in enumerator {
                   urls.append(fileURL)
                 }
@@ -124,7 +125,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
             var statMaps: [[String: Any?]] = []
             for fileURL in contentURLs {
               do {
-                try statMaps.append(NsFileCoordinatorUtilPlugin.fsStat(url: fileURL))
+                try statMaps.append(NsFileCoordinatorUtilPlugin.fsStat(url: fileURL, relativePath: relativePathInfo))
               } catch { print(error, fileURL) }
             }
             return ResultWrapper.createResult(statMaps)
@@ -375,7 +376,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     return res
   }
   
-  private static func fsStat(url: URL) throws -> [String: Any?] {
+  private static func fsStat(url: URL, relativePath: Bool) throws -> [String: Any?] {
     let fileAttributes = try url.resourceValues(forKeys: Set(NsFileCoordinatorUtilPlugin.fsResourceKeys))
     let lastModRaw = fileAttributes.contentModificationDate
     var lastMod: Int? = nil
@@ -389,7 +390,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
       urlString += "/"
     }
     
-    let stat: [String: Any?] = [
+    var stat: [String: Any?] = [
       "name": fileAttributes.name,
       "url": urlString,
       // Make sure `size` always has a value to ease parsing code on dart.
@@ -397,6 +398,9 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
       "isDir": isDir,
       "lastMod": lastMod
     ]
+    if relativePath && !url.relativePath.isEmpty {
+      stat["relativePath"] = url.relativePath
+    }
     return stat
   }
 }
