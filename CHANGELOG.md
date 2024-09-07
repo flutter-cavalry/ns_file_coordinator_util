@@ -1,3 +1,7 @@
+## 0.14.1
+
+- Better handling of `filesOnly`.
+
 ## 0.14.0
 
 - Add `relativePathInfo` to `listContents` to return relative path information.

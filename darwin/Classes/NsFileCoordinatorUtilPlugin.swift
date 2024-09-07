@@ -110,16 +110,19 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
               var urls = [URL]()
               if let enumerator = FileManager.default.enumerator(at: url, includingPropertiesForKeys: NsFileCoordinatorUtilPlugin.fsResourceKeys, options: relativePathInfo ? [.producesRelativePathURLs] : []) {
                 for case let fileURL as URL in enumerator {
+                  if (filesOnly && fileURL.hasDirectoryPath) {
+                    continue
+                  }
                   urls.append(fileURL)
                 }
               }
               contentURLs = urls
             } else {
               contentURLs = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: NsFileCoordinatorUtilPlugin.fsResourceKeys)
-            }
-            
-            if (filesOnly) {
-              contentURLs = contentURLs.filter { !$0.hasDirectoryPath }
+              
+              if (filesOnly) {
+                contentURLs = contentURLs.filter { !$0.hasDirectoryPath }
+              }
             }
             
             var statMaps: [[String: Any?]] = []
