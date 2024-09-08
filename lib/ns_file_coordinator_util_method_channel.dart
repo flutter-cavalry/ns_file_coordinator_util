@@ -51,6 +51,20 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
   }
 
   @override
+  Future<List<NsFileCoordinatorFileURL>> listContentFiles(String url,
+      {bool scoped = true}) async {
+    var fileURLs = await methodChannel
+        .invokeListMethod<Map<dynamic, dynamic>>('listContentFiles', {
+      'url': url.toString(),
+      'scoped': scoped,
+    });
+    if (fileURLs == null) {
+      return [];
+    }
+    return fileURLs.map((e) => NsFileCoordinatorFileURL.fromJson(e)).toList();
+  }
+
+  @override
   Future<void> delete(String url, {bool scoped = true}) async {
     await methodChannel.invokeMethod<void>(
         'delete', {'url': url.toString(), 'scoped': scoped});

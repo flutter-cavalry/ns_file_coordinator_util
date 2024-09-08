@@ -138,6 +138,38 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         }
         NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
         
+      case "listContentFiles":
+        guard let url = URL(string: args["url"] as! String) else {
+          DispatchQueue.main.async {
+            result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
+          }
+          return
+        }
+        let scoped = args["scoped"] as? Bool ?? false
+        
+        let res = NsFileCoordinatorUtilPlugin.scopedFSReading(scoped: scoped, url: url) { url in
+          var contentURLs: [URL]
+          var urls = [URL]()
+          if let enumerator = FileManager.default.enumerator(at: url, includingPropertiesForKeys: NsFileCoordinatorUtilPlugin.fsResourceKeys, options: [.producesRelativePathURLs]) {
+            for case let fileURL as URL in enumerator {
+              if (fileURL.hasDirectoryPath) {
+                continue
+              }
+              urls.append(fileURL)
+            }
+          }
+          contentURLs = urls
+          
+          var statMaps: [[String: Any?]] = []
+          for fileURL in contentURLs {
+            do {
+              try statMaps.append(NsFileCoordinatorUtilPlugin.urlAndRelativePath(url: fileURL))
+            } catch { print(error, fileURL) }
+          }
+          return ResultWrapper.createResult(statMaps)
+        }
+        NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
+        
       case "delete":
         guard let url = URL(string: args["url"] as! String) else {
           DispatchQueue.main.async {
@@ -402,6 +434,17 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
       "lastMod": lastMod
     ]
     if relativePath && !url.relativePath.isEmpty {
+      stat["relativePath"] = url.relativePath
+    }
+    return stat
+  }
+  
+  private static func urlAndRelativePath(url: URL) throws -> [String: Any?] {
+    var urlString = url.absoluteString
+    var stat: [String: Any?] = [
+      "url": urlString,
+    ]
+    if !url.relativePath.isEmpty {
       stat["relativePath"] = url.relativePath
     }
     return stat

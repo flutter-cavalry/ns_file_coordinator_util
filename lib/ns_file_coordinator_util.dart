@@ -30,6 +30,15 @@ class NsFileCoordinatorUtil {
         relativePathInfo: relativePathInfo);
   }
 
+  /// Returns all files in the given iCloud directory [url] and returns an array of [NsFileCoordinatorFileURL]. Faster than [listContents] if you only need file URLs.
+  Future<List<NsFileCoordinatorFileURL>> listContentFiles(String url,
+      {bool scoped = true}) async {
+    return NsFileCoordinatorUtilPlatform.instance.listContentFiles(
+      url,
+      scoped: scoped,
+    );
+  }
+
   /// Deletes the given iCloud [url].
   Future<void> delete(String url, {bool scoped = true}) async {
     return NsFileCoordinatorUtilPlatform.instance.delete(url, scoped: scoped);

@@ -1,3 +1,7 @@
+## 0.15.0
+
+- Add `listContentFiles` to list only files in a directory.
+
 ## 0.14.1
 
 - Better handling of `filesOnly`.

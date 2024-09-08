@@ -7,27 +7,23 @@ class NsFileCoordinatorEntity {
   final String name;
   final bool isDir;
   final int length;
+  final String? relativePath;
   late final DateTime? lastMod;
-  late final String? relativePath;
 
-  NsFileCoordinatorEntity(this.url, this.name, this.isDir, this.length);
+  NsFileCoordinatorEntity(this.url, this.name, this.isDir, this.length,
+      {this.relativePath, this.lastMod});
 
   NsFileCoordinatorEntity.fromJson(Map<dynamic, dynamic> json)
       : url = json['url'] as String,
         name = json['name'] as String,
         isDir = json['isDir'] as bool,
-        length = json['length'] as int {
+        length = json['length'] as int,
+        relativePath = json['relativePath'] as String? {
     var lastModTimestamp = json['lastMod'] as int?;
     if (lastModTimestamp != null) {
       lastMod = DateTime.fromMillisecondsSinceEpoch(lastModTimestamp * 1000);
     } else {
       lastMod = null;
-    }
-    var relativePath = json['relativePath'] as String?;
-    if (relativePath != null) {
-      this.relativePath = relativePath;
-    } else {
-      this.relativePath = null;
     }
   }
 
@@ -50,6 +46,26 @@ class NsFileCoordinatorEntity {
     }
     if (relativePath != null) {
       s += '\nrelativePath: $relativePath';
+    }
+    return s;
+  }
+}
+
+class NsFileCoordinatorFileURL {
+  final String url;
+  final String? relativePath;
+
+  NsFileCoordinatorFileURL(this.url, this.relativePath);
+
+  NsFileCoordinatorFileURL.fromJson(Map<dynamic, dynamic> json)
+      : url = json['url'] as String,
+        relativePath = json['relativePath'] as String?;
+
+  @override
+  String toString() {
+    var s = url;
+    if (relativePath != null) {
+      s += '|[REL]$relativePath';
     }
     return s;
   }
@@ -92,6 +108,11 @@ abstract class NsFileCoordinatorUtilPlatform extends PlatformInterface {
       bool scoped = true,
       bool? relativePathInfo}) async {
     throw UnimplementedError('listContents() has not been implemented.');
+  }
+
+  Future<List<NsFileCoordinatorFileURL>> listContentFiles(String url,
+      {bool scoped = true}) async {
+    throw UnimplementedError('listContentFiles() has not been implemented.');
   }
 
   Future<void> delete(String url, {bool scoped = true}) async {
