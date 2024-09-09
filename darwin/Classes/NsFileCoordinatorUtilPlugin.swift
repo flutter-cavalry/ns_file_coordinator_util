@@ -39,6 +39,9 @@ class ResultWrapper<T> {
 public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
   static let fsResourceKeys: [URLResourceKey] = [.nameKey, .fileSizeKey, .isDirectoryKey, .contentModificationDateKey]
   
+  let queue = DispatchQueue.init(label: "ns_file_coordinator_util/queue")
+  let coordinator = NSFileCoordinator()
+  
   public static func register(with registrar: FlutterPluginRegistrar) {
 #if os(iOS)
     let binaryMessenger = registrar.messenger()
@@ -55,7 +58,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
       result(FlutterError(code: "InvalidArgsType", message: "Invalid args type", details: nil))
       return
     }
-    DispatchQueue.global().async {
+    queue.async {
       switch call.method {
       case "readFile":
         guard let url = URL(string: args["src"] as! String), let destURL = URL(string: args["dest"] as! String) else {
@@ -65,7 +68,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           return
         }
         
-        let res = NsFileCoordinatorUtilPlugin.coordinateFSReading(url: url) { url in
+        let res = self.coordinateFSReading(url: url) { url in
           do {
             try FileManager.default.copyItem(at: url, to: destURL)
             return ResultWrapper.createResult(true)
@@ -73,7 +76,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
             return ResultWrapper.createError(error)
           }
         }
-        NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
+        self.reportResult(result: result, data: res)
         
       case "stat":
         guard let url = URL(string: args["url"] as! String) else {
@@ -83,11 +86,11 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           return
         }
         
-        let res = NsFileCoordinatorUtilPlugin.coordinateFSReading(url: url) { url in
-          let statMap = try? NsFileCoordinatorUtilPlugin.fsStat(url: url, relativePath: false)
+        let res = self.coordinateFSReading(url: url) { url in
+          let statMap = try? self.fsStat(url: url, relativePath: false)
           return ResultWrapper.createResult(statMap)
         }
-        NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
+        self.reportResult(result: result, data: res)
         
       case "listContents":
         guard let url = URL(string: args["url"] as! String) else {
@@ -100,7 +103,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         let filesOnly = args["filesOnly"] as? Bool ?? false
         let relativePathInfo = args["relativePathInfo"] as? Bool ?? false
         
-        let res = NsFileCoordinatorUtilPlugin.coordinateFSReading(url: url) { url in
+        let res = self.coordinateFSReading(url: url) { url in
           do {
             var contentURLs: [URL]
             if recursive {
@@ -125,7 +128,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
             var statMaps: [[String: Any?]] = []
             for fileURL in contentURLs {
               do {
-                try statMaps.append(NsFileCoordinatorUtilPlugin.fsStat(url: fileURL, relativePath: relativePathInfo))
+                try statMaps.append(self.fsStat(url: fileURL, relativePath: relativePathInfo))
               } catch { print(error, fileURL) }
             }
             return ResultWrapper.createResult(statMaps)
@@ -133,7 +136,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
             return ResultWrapper.createError(error)
           }
         }
-        NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
+        self.reportResult(result: result, data: res)
         
       case "listContentFiles":
         guard let url = URL(string: args["url"] as! String) else {
@@ -143,7 +146,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           return
         }
         
-        let res = NsFileCoordinatorUtilPlugin.coordinateFSReading(url: url) { url in
+        let res = self.coordinateFSReading(url: url) { url in
           var contentURLs: [URL]
           var urls = [URL]()
           if let enumerator = FileManager.default.enumerator(at: url, includingPropertiesForKeys: NsFileCoordinatorUtilPlugin.fsResourceKeys, options: [.producesRelativePathURLs]) {
@@ -159,12 +162,12 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           var statMaps: [[String: Any?]] = []
           for fileURL in contentURLs {
             do {
-              try statMaps.append(NsFileCoordinatorUtilPlugin.urlAndRelativePath(url: fileURL))
+              try statMaps.append(self.urlAndRelativePath(url: fileURL))
             } catch { print(error, fileURL) }
           }
           return ResultWrapper.createResult(statMaps)
         }
-        NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
+        self.reportResult(result: result, data: res)
         
       case "delete":
         guard let url = URL(string: args["url"] as! String) else {
@@ -174,7 +177,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           return
         }
         
-        let res = NsFileCoordinatorUtilPlugin.coordinateFSDeleting(url: url) { url in
+        let res = self.coordinateFSDeleting(url: url) { url in
           do {
             try FileManager.default.removeItem(at: url)
             return ResultWrapper.createResult(true)
@@ -182,7 +185,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
             return ResultWrapper.createError(error)
           }
         }
-        NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
+        self.reportResult(result: result, data: res)
         
       case "move":
         guard let srcURL = URL(string: args["src"] as! String), let destURL = URL(string: args["dest"] as! String) else {
@@ -192,7 +195,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           return
         }
         
-        let res = NsFileCoordinatorUtilPlugin.coordinateFSMoving(src: srcURL, dest: destURL) { srcURL, destURL in
+        let res = self.coordinateFSMoving(src: srcURL, dest: destURL) { srcURL, destURL in
           do {
             try FileManager.default.moveItem(at: srcURL, to: destURL)
             return ResultWrapper.createResult(true)
@@ -200,7 +203,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
             return ResultWrapper.createError(error)
           }
         }
-        NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
+        self.reportResult(result: result, data: res)
         
       case "copy":
         guard let srcURL = URL(string: args["src"] as! String), let destURL = URL(string: args["dest"] as! String) else {
@@ -210,7 +213,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           return
         }
         
-        let res = NsFileCoordinatorUtilPlugin.coordinateFSReadingAndWriting(src: srcURL, dest: destURL) { srcURL, destURL in
+        let res = self.coordinateFSReadingAndWriting(src: srcURL, dest: destURL) { srcURL, destURL in
           do {
             try FileManager.default.createDirectory(at: destURL.deletingLastPathComponent(), withIntermediateDirectories: true)
             try FileManager.default.copyItem(at: srcURL, to: destURL)
@@ -219,7 +222,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
             return ResultWrapper.createError(error)
           }
         }
-        NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
+        self.reportResult(result: result, data: res)
         
       case "isDirectory":
         guard let url = URL(string: args["url"] as! String) else {
@@ -229,12 +232,12 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           return
         }
         
-        let res = NsFileCoordinatorUtilPlugin.coordinateFSReading(url: url) { url in
+        let res = self.coordinateFSReading(url: url) { url in
           var isDirectory: ObjCBool = false
           let exists = FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory)
           return ResultWrapper.createResult(exists ? isDirectory.boolValue : nil)
         }
-        NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
+        self.reportResult(result: result, data: res)
         
       case "mkdir":
         guard let url = URL(string: args["url"] as! String) else {
@@ -244,7 +247,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           return
         }
         
-        let res = NsFileCoordinatorUtilPlugin.coordinateFSWriting(url: url) { url in
+        let res = self.coordinateFSWriting(url: url) { url in
           do {
             try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
             return ResultWrapper.createResult(true)
@@ -252,7 +255,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
             return ResultWrapper.createError(error)
           }
         }
-        NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
+        self.reportResult(result: result, data: res)
         
       case "isEmptyDirectory":
         guard let url = URL(string: args["url"] as! String) else {
@@ -262,7 +265,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           return
         }
         
-        let res = NsFileCoordinatorUtilPlugin.coordinateFSReading(url: url, cb: { url in
+        let res = self.coordinateFSReading(url: url, cb: { url in
           do {
             let contentURLs = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: [])
             let isEmpty = contentURLs.count == 0
@@ -271,7 +274,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
             return ResultWrapper.createError(error)
           }
         })
-        NsFileCoordinatorUtilPlugin.reportResult(result: result, data: res)
+        self.reportResult(result: result, data: res)
         
       default:
         DispatchQueue.main.async {
@@ -281,7 +284,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     }
   }
   
-  private static func reportResult<T>(result: @escaping FlutterResult, data: ResultWrapper<T>) {
+  private func reportResult<T>(result: @escaping FlutterResult, data: ResultWrapper<T>) {
     DispatchQueue.main.async {
       if let err = data.error {
         result(FlutterError(code: "PluginError", message: err.localizedDescription, details: nil))
@@ -291,10 +294,10 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     }
   }
   
-  private static func coordinateFSDeleting<T>(url: URL, cb: (URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
+  private func coordinateFSDeleting<T>(url: URL, cb: (URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
     var coordinatorErr: NSError? = nil
     var res: ResultWrapper<T>?
-    NSFileCoordinator().coordinate(writingItemAt: url, options: .forDeleting, error: &coordinatorErr) { (url) in
+    coordinator.coordinate(writingItemAt: url, options: .forDeleting, error: &coordinatorErr) { (url) in
       res = cb(url)
     }
     
@@ -310,10 +313,10 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     return res
   }
   
-  private static func coordinateFSWriting<T>(url: URL, cb: (URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
+  private func coordinateFSWriting<T>(url: URL, cb: (URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
     var coordinatorErr: NSError? = nil
     var res: ResultWrapper<T>?
-    NSFileCoordinator().coordinate(writingItemAt: url, error: &coordinatorErr) { (url) in
+    coordinator.coordinate(writingItemAt: url, error: &coordinatorErr) { (url) in
       res = cb(url)
     }
     
@@ -329,10 +332,10 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     return res
   }
   
-  private static func coordinateFSReading<T>(url: URL, cb: (URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
+  private func coordinateFSReading<T>(url: URL, cb: (URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
     var coordinatorErr: NSError? = nil
     var res: ResultWrapper<T>?
-    NSFileCoordinator().coordinate(readingItemAt: url, error: &coordinatorErr) { (url) in
+    coordinator.coordinate(readingItemAt: url, error: &coordinatorErr) { (url) in
       res = cb(url)
     }
     
@@ -348,10 +351,10 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     return res
   }
   
-  private static func coordinateReadingAndWriting<T>(src: URL, dest: URL, cb: (URL, URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
+  private func coordinateFSReadingAndWriting<T>(src: URL, dest: URL, cb: (URL, URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
     var coordinatorErr: NSError? = nil
     var res: ResultWrapper<T>?
-    NSFileCoordinator().coordinate(readingItemAt: src, writingItemAt: dest, error: &coordinatorErr) { (src, dest) in
+    coordinator.coordinate(readingItemAt: src, writingItemAt: dest, error: &coordinatorErr) { (src, dest) in
       res = cb(src, dest)
     }
     
@@ -367,10 +370,10 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     return res
   }
   
-  private static func coordinateFSMoving<T>(src: URL, dest: URL, cb: (URL, URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
+  private func coordinateFSMoving<T>(src: URL, dest: URL, cb: (URL, URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
     var coordinatorErr: NSError? = nil
     var res: ResultWrapper<T>?
-    NSFileCoordinator().coordinate(writingItemAt: src, options: .forMoving, writingItemAt: dest, options: .forReplacing, error: &coordinatorErr) { (src, dest) in
+    coordinator.coordinate(writingItemAt: src, options: .forMoving, writingItemAt: dest, options: .forReplacing, error: &coordinatorErr) { (src, dest) in
       res = cb(src, dest)
     }
     
@@ -386,7 +389,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     return res
   }
   
-  private static func fsStat(url: URL, relativePath: Bool) throws -> [String: Any?] {
+  private func fsStat(url: URL, relativePath: Bool) throws -> [String: Any?] {
     let fileAttributes = try url.resourceValues(forKeys: Set(NsFileCoordinatorUtilPlugin.fsResourceKeys))
     let lastModRaw = fileAttributes.contentModificationDate
     var lastMod: Int? = nil
@@ -414,10 +417,9 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     return stat
   }
   
-  private static func urlAndRelativePath(url: URL) throws -> [String: Any?] {
-    var urlString = url.absoluteString
+  private func urlAndRelativePath(url: URL) throws -> [String: Any?] {
     var stat: [String: Any?] = [
-      "url": urlString,
+      "url": url.absoluteString,
     ]
     if !url.relativePath.isEmpty {
       stat["relativePath"] = url.relativePath
