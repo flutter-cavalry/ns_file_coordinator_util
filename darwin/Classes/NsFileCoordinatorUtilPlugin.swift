@@ -294,13 +294,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     }
   }
   
-  private func coordinateFSDeleting<T>(url: URL, cb: (URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
-    var coordinatorErr: NSError? = nil
-    var res: ResultWrapper<T>?
-    coordinator.coordinate(writingItemAt: url, options: .forDeleting, error: &coordinatorErr) { (url) in
-      res = cb(url)
-    }
-    
+  private func handleResultWrapperError<T>(_ res: ResultWrapper<T>?, coordinatorErr: NSError?) -> ResultWrapper<T> {
     guard let res = res else {
       return ResultWrapper<T>.createError(CustomError(errorMessage: "Unexpected nil res in coordinateFSDeleting"))
     }
@@ -313,23 +307,22 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     return res
   }
   
+  private func coordinateFSDeleting<T>(url: URL, cb: (URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
+    var coordinatorErr: NSError? = nil
+    var res: ResultWrapper<T>?
+    coordinator.coordinate(writingItemAt: url, options: .forDeleting, error: &coordinatorErr) { (url) in
+      res = cb(url)
+    }
+    return handleResultWrapperError(res, coordinatorErr: coordinatorErr)
+  }
+  
   private func coordinateFSWriting<T>(url: URL, cb: (URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
     var coordinatorErr: NSError? = nil
     var res: ResultWrapper<T>?
     coordinator.coordinate(writingItemAt: url, error: &coordinatorErr) { (url) in
       res = cb(url)
     }
-    
-    guard let res = res else {
-      return ResultWrapper<T>.createError(CustomError(errorMessage: "Unexpected nil res in coordinateFSWriting"))
-    }
-    if res.error != nil {
-      return res
-    }
-    if let err = coordinatorErr {
-      return ResultWrapper<T>.createError(err)
-    }
-    return res
+    return handleResultWrapperError(res, coordinatorErr: coordinatorErr)
   }
   
   private func coordinateFSReading<T>(url: URL, cb: (URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
@@ -338,17 +331,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     coordinator.coordinate(readingItemAt: url, error: &coordinatorErr) { (url) in
       res = cb(url)
     }
-    
-    guard let res = res else {
-      return ResultWrapper<T>.createError(CustomError(errorMessage: "Unexpected nil res in coordinateFSReading"))
-    }
-    if res.error != nil {
-      return res
-    }
-    if let err = coordinatorErr {
-      return ResultWrapper<T>.createError(err)
-    }
-    return res
+    return handleResultWrapperError(res, coordinatorErr: coordinatorErr)
   }
   
   private func coordinateFSReadingAndWriting<T>(src: URL, dest: URL, cb: (URL, URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
@@ -357,17 +340,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     coordinator.coordinate(readingItemAt: src, writingItemAt: dest, error: &coordinatorErr) { (src, dest) in
       res = cb(src, dest)
     }
-    
-    guard let res = res else {
-      return ResultWrapper<T>.createError(CustomError(errorMessage: "Unexpected nil res in coordinateReadingAndWriting"))
-    }
-    if res.error != nil {
-      return res
-    }
-    if let err = coordinatorErr {
-      return ResultWrapper<T>.createError(err)
-    }
-    return res
+    return handleResultWrapperError(res, coordinatorErr: coordinatorErr)
   }
   
   private func coordinateFSMoving<T>(src: URL, dest: URL, cb: (URL, URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
@@ -376,17 +349,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     coordinator.coordinate(writingItemAt: src, options: .forMoving, writingItemAt: dest, options: .forReplacing, error: &coordinatorErr) { (src, dest) in
       res = cb(src, dest)
     }
-    
-    guard let res = res else {
-      return ResultWrapper<T>.createError(CustomError(errorMessage: "Unexpected nil res in coordinateFSMoving"))
-    }
-    if res.error != nil {
-      return res
-    }
-    if let err = coordinatorErr {
-      return ResultWrapper<T>.createError(err)
-    }
-    return res
+    return handleResultWrapperError(res, coordinatorErr: coordinatorErr)
   }
   
   private func fsStat(url: URL, relativePath: Bool) throws -> [String: Any?] {
