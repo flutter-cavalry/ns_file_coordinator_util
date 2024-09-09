@@ -21,7 +21,6 @@ Future<NsFileCoordinatorEntity?> stat(String url);
 Future<List<NsFileCoordinatorEntity>> listContents(String url,
     {bool? recursive,
     bool? filesOnly,
-    bool scoped = true,
     bool? relativePathInfo});
 
 /// Deletes the given iCloud [url].

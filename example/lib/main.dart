@@ -191,7 +191,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Reading/downloading $dir';
       });
-      await _plugin.readFile(fileAbsUrl, destUrl, scoped: true);
+      await _plugin.readFile(fileAbsUrl, destUrl);
 
       var length = await File(destPath).length();
       setState(() {
@@ -215,7 +215,7 @@ class _MyHomeState extends State<MyHome> {
         _output = 'Listing contents of $dir';
       });
       var contents = await _plugin.listContents(dir,
-          scoped: true, recursive: recursive, relativePathInfo: true);
+          recursive: recursive, relativePathInfo: true);
       setState(() {
         _output = '--- Contents ---\n${contents.join('\n')}';
       });
@@ -236,7 +236,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Listing content files of $dir';
       });
-      var contents = await _plugin.listContentFiles(dir, scoped: true);
+      var contents = await _plugin.listContentFiles(dir);
       setState(() {
         _output = '--- Contents ---\n${contents.join('\n')}';
       });
@@ -261,7 +261,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Getting information of $dir';
       });
-      var info = await _plugin.stat(fileAbsUrl, scoped: true);
+      var info = await _plugin.stat(fileAbsUrl);
       setState(() {
         _output = info == null ? '<NULL>' : info.fullDescription();
       });
@@ -286,7 +286,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Deleting $dir';
       });
-      await _plugin.delete(fileAbsUrl, scoped: true);
+      await _plugin.delete(fileAbsUrl);
       setState(() {
         _output = 'Deleted';
       });
@@ -313,7 +313,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Rename $fileAbsUrl to $newFileAbsUrl';
       });
-      await _plugin.move(fileAbsUrl, newFileAbsUrl, scoped: true);
+      await _plugin.move(fileAbsUrl, newFileAbsUrl);
       setState(() {
         _output = 'Renamed';
       });
@@ -340,7 +340,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Writing to $fileAbsUrl';
       });
-      await _plugin.copy(tmpDirUrl, fileAbsUrl, scoped: true);
+      await _plugin.copy(tmpDirUrl, fileAbsUrl);
       setState(() {
         _output = 'Succeeded';
       });
@@ -365,7 +365,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Checking if $fileAbsUrl exists';
       });
-      var isDir = await _plugin.isDirectory(fileAbsUrl, scoped: true);
+      var isDir = await _plugin.isDirectory(fileAbsUrl);
       setState(() {
         if (isDir == null) {
           _output = 'Not found';
@@ -394,7 +394,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Creating directory $fileAbsUrl';
       });
-      await _plugin.mkdir(fileAbsUrl, scoped: true);
+      await _plugin.mkdir(fileAbsUrl);
       setState(() {
         _output = 'Created';
       });
