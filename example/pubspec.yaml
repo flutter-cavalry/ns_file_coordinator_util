@@ -34,6 +34,7 @@ dependencies:
   path: ^1.8.2
   ios_document_picker: ^0.0.1
   darwin_url: ^0.3.0
+  pretty_bytes: ^6.2.0
 
 dev_dependencies:
   flutter_test:

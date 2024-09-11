@@ -9,9 +9,10 @@ class NsFileCoordinatorUtil {
   }
 
   /// Reads an iCloud [srcUrl] file and returns a stream of [Uint8List].
-  Future<Stream<Uint8List>> readFileAsync(String srcUrl, {int? bufferSize}) {
+  Future<Stream<Uint8List>> readFileAsync(String srcUrl,
+      {int? bufferSize, double? debugDelay}) {
     return NsFileCoordinatorUtilPlatform.instance
-        .readFileAsync(srcUrl, bufferSize: bufferSize);
+        .readFileAsync(srcUrl, bufferSize: bufferSize, debugDelay: debugDelay);
   }
 
   /// Returns information about the given [url].

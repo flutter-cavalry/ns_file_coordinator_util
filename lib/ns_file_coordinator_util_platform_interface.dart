@@ -99,7 +99,8 @@ abstract class NsFileCoordinatorUtilPlatform extends PlatformInterface {
     throw UnimplementedError('readFile() has not been implemented.');
   }
 
-  Future<Stream<Uint8List>> readFileAsync(String srcUrl, {int? bufferSize}) {
+  Future<Stream<Uint8List>> readFileAsync(String srcUrl,
+      {int? bufferSize, double? debugDelay}) {
     throw UnimplementedError('readFileAsync() has not been implemented.');
   }
 

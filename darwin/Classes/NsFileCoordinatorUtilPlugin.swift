@@ -94,11 +94,12 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           return
         }
         let bufferSize = args["bufferSize"] as? Int ?? 4 * 1024 * 1024
+        let debugDelay = args["debugDelay"] as? Double
         var coordinatorErr: NSError? = nil
         self.coordinator.coordinate(readingItemAt: url, error: &coordinatorErr) { (url) in
           // Returns immediately and let dart side start listening stream.
           result(nil)
-          let eventHandler = ReadFileHandler(url: url, bufferSize: bufferSize, queue: self.streamQueue)
+          let eventHandler = ReadFileHandler(url: url, bufferSize: bufferSize, queue: self.streamQueue, debugDelay: debugDelay)
           let eventChannel = FlutterEventChannel(name: "ns_file_coordinator_util/event/\(session)", binaryMessenger: self.binaryMessenger)
           eventChannel.setStreamHandler(eventHandler)
           eventHandler.wait()
@@ -425,14 +426,16 @@ class ReadFileHandler: NSObject, FlutterStreamHandler {
   let url: URL
   let bufferSize: Int
   let queue: DispatchQueue
+  let debugDelay: Double?
   private let semaphore = DispatchSemaphore(value: 0)
   private var eventSink: FlutterEventSink?
   private var isCancelled = false
   
-  init(url: URL, bufferSize: Int, queue: DispatchQueue) {
+  init(url: URL, bufferSize: Int, queue: DispatchQueue, debugDelay: Double?) {
     self.url = url
     self.bufferSize = bufferSize
     self.queue = queue
+    self.debugDelay = debugDelay
   }
   
   // This is called from plugin thread.
@@ -451,12 +454,16 @@ class ReadFileHandler: NSObject, FlutterStreamHandler {
         stream.open()
         
         while case let amount = stream.read(&buf, maxLength: self.bufferSize), amount > 0, !self.isCancelled {
+          if let delay = self.debugDelay {
+            Thread.sleep(forTimeInterval: delay)
+          }
           let data = Data(buf[..<amount])
           self.eventSink?(data)
         }
         stream.close()
-        self.eventSink?(FlutterEndOfEventStream)
       }
+      
+      self.eventSink?(FlutterEndOfEventStream)
       self.semaphore.signal()
     }
     return nil
@@ -464,11 +471,9 @@ class ReadFileHandler: NSObject, FlutterStreamHandler {
   
   // Called from main thread.
   func onCancel(withArguments arguments: Any?) -> FlutterError? {
-    queue.async {
-      self.eventSink = nil
-      self.isCancelled = true
-      self.semaphore.signal()
-    }
+    self.eventSink = nil
+    self.isCancelled = true
+    // Don't cancel semaphore here. It will be handled in `onListen`.
     return nil
   }
 }

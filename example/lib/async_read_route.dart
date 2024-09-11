@@ -3,17 +3,14 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:ns_file_coordinator_util/ns_file_coordinator_util.dart';
 import 'package:ns_file_coordinator_util/ns_file_coordinator_util_platform_interface.dart';
-
-enum AsyncReadTaskState {
-  reading,
-  done,
-}
+import 'package:pretty_bytes/pretty_bytes.dart';
 
 class AsyncReadTask {
   final NsFileCoordinatorEntity entity;
-  AsyncReadTaskState? state;
+  bool working = false;
   BytesBuilder? bytes;
   String? doneMsg;
+  bool cancelled = false;
 
   AsyncReadTask(this.entity);
 }
@@ -48,65 +45,95 @@ class _AsyncReadRouteState extends State<AsyncReadRoute> {
 
   @override
   Widget build(BuildContext context) {
+    final body = Padding(
+        padding: const EdgeInsets.all(8),
+        child: ListView.builder(
+          itemCount: _tasks.length,
+          itemBuilder: (context, index) {
+            final task = _tasks[index];
+            Widget content;
+            if (task.working) {
+              content = Text(
+                  '🟢 ${prettyBytes(task.bytes!.length.toDouble())} / ${prettyBytes(task.entity.length.toDouble())}');
+            } else {
+              content = Text(task.doneMsg ?? '');
+            }
+            Widget w = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                        child: Text(
+                            '${prettyBytes(task.entity.length.toDouble())} | ${task.entity.name}')),
+                    OutlinedButton(
+                      onPressed: task.working
+                          ? null
+                          : () async {
+                              try {
+                                task.bytes = BytesBuilder();
+                                setState(() {
+                                  task.working = true;
+                                });
+                                final stream = await _plugin.readFileAsync(
+                                    task.entity.url,
+                                    bufferSize: 1024 * 300,
+                                    debugDelay: 0.5);
+                                await for (final bytes in stream) {
+                                  if (task.cancelled) {
+                                    break;
+                                  }
+                                  task.bytes!.add(bytes);
+                                  setState(() {});
+                                }
+                                setState(() {
+                                  task.working = false;
+                                  task.cancelled = false;
+                                  task.doneMsg =
+                                      task.cancelled ? 'Cancelled' : 'Done';
+                                });
+                              } catch (e) {
+                                task.working = false;
+                                task.cancelled = false;
+                                task.doneMsg = 'Error: $e';
+                                setState(() {});
+                              }
+                            },
+                      child: const Text('Async read'),
+                    ),
+                    const SizedBox(
+                      width: 8,
+                    ),
+                    OutlinedButton(
+                        onPressed: !task.working || task.cancelled
+                            ? null
+                            : () {
+                                setState(() {
+                                  task.cancelled = true;
+                                });
+                              },
+                        child: Text(task.cancelled ? 'Cancelling' : 'Cancel')),
+                  ],
+                ),
+                content,
+              ],
+            );
+            w = Padding(padding: const EdgeInsets.all(8), child: w);
+            return w;
+          },
+        ));
     return Scaffold(
       appBar: AppBar(
         title: const Text('Plugin example app'),
       ),
-      body: Padding(
-          padding: const EdgeInsets.all(8),
-          child: ListView.builder(
-            itemCount: _tasks.length,
-            itemBuilder: (context, index) {
-              final task = _tasks[index];
-              Widget? content;
-              if (task.state != null) {
-                if (task.state == AsyncReadTaskState.reading) {
-                  content =
-                      Text('${task.bytes!.length} / ${task.entity.length}');
-                } else {
-                  content = Text(task.doneMsg ?? 'Done');
-                }
-              }
-              Widget w = Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(child: Text(task.entity.name)),
-                      OutlinedButton(
-                        onPressed: () async {
-                          try {
-                            final stream = await _plugin.readFileAsync(
-                                task.entity.url,
-                                bufferSize: 1024 * 500);
-                            task.state = AsyncReadTaskState.reading;
-                            task.bytes = BytesBuilder();
-                            setState(() {});
-                            await for (final bytes in stream) {
-                              task.bytes!.add(bytes);
-                              setState(() {});
-                            }
-                            setState(() {
-                              task.state = AsyncReadTaskState.done;
-                              task.doneMsg = 'Done';
-                            });
-                          } catch (e) {
-                            task.state = AsyncReadTaskState.done;
-                            task.doneMsg = 'Error: $e';
-                            setState(() {});
-                          }
-                        },
-                        child: const Text('Start'),
-                      ),
-                    ],
-                  ),
-                  if (content != null) content,
-                ],
-              );
-              w = Padding(padding: const EdgeInsets.all(8), child: w);
-              return w;
-            },
-          )),
+      body: Column(
+        children: [
+          const Text(
+              'NOTE: All read operations have a 0.5s delay for debugging.',
+              style: TextStyle(color: Colors.red)),
+          Expanded(child: body),
+        ],
+      ),
     );
   }
 }
