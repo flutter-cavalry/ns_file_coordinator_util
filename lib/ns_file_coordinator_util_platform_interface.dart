@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'ns_file_coordinator_util_method_channel.dart';
@@ -95,6 +97,10 @@ abstract class NsFileCoordinatorUtilPlatform extends PlatformInterface {
 
   Future<void> readFile(String srcUrl, String destUrl) {
     throw UnimplementedError('readFile() has not been implemented.');
+  }
+
+  Future<Stream<Uint8List>> readFileAsync(String srcUrl, {int? bufferSize}) {
+    throw UnimplementedError('readFileAsync() has not been implemented.');
   }
 
   Future<NsFileCoordinatorEntity?> stat(String url) async {

@@ -1,9 +1,17 @@
+import 'dart:typed_data';
+
 import 'ns_file_coordinator_util_platform_interface.dart';
 
 class NsFileCoordinatorUtil {
   /// Reads an iCloud [srcUrl] file and copies it to [destUrl].
   Future<void> readFile(String srcUrl, String destUrl) {
     return NsFileCoordinatorUtilPlatform.instance.readFile(srcUrl, destUrl);
+  }
+
+  /// Reads an iCloud [srcUrl] file and returns a stream of [Uint8List].
+  Future<Stream<Uint8List>> readFileAsync(String srcUrl, {int? bufferSize}) {
+    return NsFileCoordinatorUtilPlatform.instance
+        .readFileAsync(srcUrl, bufferSize: bufferSize);
   }
 
   /// Returns information about the given [url].

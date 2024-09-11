@@ -39,8 +39,10 @@ class ResultWrapper<T> {
 public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
   static let fsResourceKeys: [URLResourceKey] = [.nameKey, .fileSizeKey, .isDirectoryKey, .contentModificationDateKey]
   
-  let queue = DispatchQueue.init(label: "ns_file_coordinator_util/queue")
+  let pluginQueue = DispatchQueue.init(label: "ns_file_coordinator_util/queue")
+  let streamQueue = DispatchQueue.init(label: "ns_file_coordinator_util/stream_queue")
   let coordinator = NSFileCoordinator()
+  let binaryMessenger: FlutterBinaryMessenger
   
   public static func register(with registrar: FlutterPluginRegistrar) {
 #if os(iOS)
@@ -49,8 +51,12 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     let binaryMessenger = registrar.messenger
 #endif
     let channel = FlutterMethodChannel(name: "ns_file_coordinator_util", binaryMessenger: binaryMessenger)
-    let instance = NsFileCoordinatorUtilPlugin()
+    let instance = NsFileCoordinatorUtilPlugin(binaryMessenger: binaryMessenger)
     registrar.addMethodCallDelegate(instance, channel: channel)
+  }
+  
+  init(binaryMessenger: FlutterBinaryMessenger) {
+    self.binaryMessenger = binaryMessenger
   }
   
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -58,7 +64,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
       result(FlutterError(code: "InvalidArgsType", message: "Invalid args type", details: nil))
       return
     }
-    queue.async {
+    pluginQueue.async {
       switch call.method {
       case "readFile":
         guard let url = URL(string: args["src"] as! String), let destURL = URL(string: args["dest"] as! String) else {
@@ -77,6 +83,30 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           }
         }
         self.reportResult(result: result, data: res)
+        
+      case "readFileAsync":
+        guard let url = URL(string: args["src"] as! String),
+              let session = args["session"] as? Int
+        else {
+          DispatchQueue.main.async {
+            result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
+          }
+          return
+        }
+        let bufferSize = args["bufferSize"] as? Int ?? 4 * 1024 * 1024
+        var coordinatorErr: NSError? = nil
+        self.coordinator.coordinate(readingItemAt: url, error: &coordinatorErr) { (url) in
+          // Returns immediately and let dart side start listening stream.
+          result(nil)
+          let eventHandler = ReadFileHandler(url: url, bufferSize: bufferSize, queue: self.streamQueue)
+          let eventChannel = FlutterEventChannel(name: "ns_file_coordinator_util/event/\(session)", binaryMessenger: self.binaryMessenger)
+          eventChannel.setStreamHandler(eventHandler)
+          eventHandler.wait()
+        }
+        // If err is not nil, the block in coordinator is not executed.
+        if let coordinatorErr = coordinatorErr {
+          result(FlutterError(code: "PluginError", message: coordinatorErr.localizedDescription, details: nil))
+        }
         
       case "stat":
         guard let url = URL(string: args["url"] as! String) else {
@@ -388,5 +418,57 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
       stat["relativePath"] = url.relativePath
     }
     return stat
+  }
+}
+
+class ReadFileHandler: NSObject, FlutterStreamHandler {
+  let url: URL
+  let bufferSize: Int
+  let queue: DispatchQueue
+  private let semaphore = DispatchSemaphore(value: 0)
+  private var eventSink: FlutterEventSink?
+  private var isCancelled = false
+  
+  init(url: URL, bufferSize: Int, queue: DispatchQueue) {
+    self.url = url
+    self.bufferSize = bufferSize
+    self.queue = queue
+  }
+  
+  // This is called from plugin thread.
+  func wait() {
+    semaphore.wait()  // Block the calling thread
+  }
+  
+  // Called from main thread.
+  func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+    // Use instance variable `eventSink` instead of `events`. Because when `onCancel` is called, `eventSink` is reset.
+    self.eventSink = events
+    
+    queue.async {
+      if let stream = InputStream(url: self.url) {
+        var buf = [UInt8](repeating: 0, count: self.bufferSize)
+        stream.open()
+        
+        while case let amount = stream.read(&buf, maxLength: self.bufferSize), amount > 0, !self.isCancelled {
+          let data = Data(buf[..<amount])
+          self.eventSink?(data)
+        }
+        stream.close()
+        self.eventSink?(FlutterEndOfEventStream)
+      }
+      self.semaphore.signal()
+    }
+    return nil
+  }
+  
+  // Called from main thread.
+  func onCancel(withArguments arguments: Any?) -> FlutterError? {
+    queue.async {
+      self.eventSink = nil
+      self.isCancelled = true
+      self.semaphore.signal()
+    }
+    return nil
   }
 }

@@ -9,12 +9,28 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
   @visibleForTesting
   final methodChannel = const MethodChannel('ns_file_coordinator_util');
 
+  var _session = 0;
+
   @override
   Future<void> readFile(String srcUrl, String destUrl) async {
     await methodChannel.invokeMethod<void>('readFile', {
       'src': srcUrl.toString(),
       'dest': destUrl.toString(),
     });
+  }
+
+  @override
+  Future<Stream<Uint8List>> readFileAsync(String srcUrl,
+      {int? bufferSize}) async {
+    var session = _nextSession();
+    await methodChannel.invokeMethod<dynamic>('readFileAsync', {
+      'src': srcUrl.toString(),
+      'bufferSize': bufferSize,
+      'session': session,
+    });
+    var stream = EventChannel('ns_file_coordinator_util/event/$session')
+        .receiveBroadcastStream();
+    return stream.map((e) => e as Uint8List);
   }
 
   @override
@@ -92,5 +108,9 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
     return await methodChannel
             .invokeMethod<bool>('isEmptyDirectory', {'url': url.toString()}) ??
         false;
+  }
+
+  int _nextSession() {
+    return ++_session;
   }
 }
