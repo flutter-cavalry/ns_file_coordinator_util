@@ -51,8 +51,8 @@ class NsFileCoordinatorUtil {
   }
 
   /// Copies [srcUrl] url to iCloud [dest].
-  Future<void> copy(String srcUrl, String destUrl) {
-    return NsFileCoordinatorUtilPlatform.instance.copy(srcUrl, destUrl);
+  Future<void> copyPath(String srcUrl, String destUrl) {
+    return NsFileCoordinatorUtilPlatform.instance.copyPath(srcUrl, destUrl);
   }
 
   /// Checks if the given iCloud [url] is a directory.

@@ -89,8 +89,8 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
   }
 
   @override
-  Future<void> copy(String srcUrl, String destUrl) async {
-    await methodChannel.invokeMethod<void>('copy', {
+  Future<void> copyPath(String srcUrl, String destUrl) async {
+    await methodChannel.invokeMethod<void>('copyPath', {
       'src': srcUrl.toString(),
       'dest': destUrl.toString(),
     });

@@ -235,7 +235,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         }
         self.reportResult(result: result, data: res)
         
-      case "copy":
+      case "copyPath":
         guard let srcURL = URL(string: args["src"] as! String), let destURL = URL(string: args["dest"] as! String) else {
           DispatchQueue.main.async {
             result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))

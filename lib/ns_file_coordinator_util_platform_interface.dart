@@ -125,8 +125,8 @@ abstract class NsFileCoordinatorUtilPlatform extends PlatformInterface {
     throw UnimplementedError('move() has not been implemented.');
   }
 
-  Future<void> copy(String srcUrl, String destUrl) {
-    throw UnimplementedError('copy() has not been implemented.');
+  Future<void> copyPath(String srcUrl, String destUrl) {
+    throw UnimplementedError('copyPath() has not been implemented.');
   }
 
   Future<bool?> isDirectory(String url) async {

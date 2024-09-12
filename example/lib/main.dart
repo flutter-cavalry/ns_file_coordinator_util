@@ -350,7 +350,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Writing to $fileAbsUrl';
       });
-      await _plugin.copy(tmpDirUrl, fileAbsUrl);
+      await _plugin.copyPath(tmpDirUrl, fileAbsUrl);
       setState(() {
         _output = 'Succeeded';
       });

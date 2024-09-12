@@ -35,7 +35,7 @@ Future<void> delete(String url);
 Future<void> move(String srcUrl, String destUrl);
 
 /// Copies [srcUrl] url to iCloud [destUrl].
-Future<void> copy(String srcUrl, String destUrl);
+Future<void> copyPath(String srcUrl, String destUrl);
 
 /// Checks if the given iCloud [url] is a directory.
 /// Returns true if the url is a directory, or false if it's a file.
