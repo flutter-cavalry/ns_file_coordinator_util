@@ -101,6 +101,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           let eventChannel = FlutterEventChannel(name: "ns_file_coordinator_util/event/\(session)", binaryMessenger: self.binaryMessenger)
           eventChannel.setStreamHandler(eventHandler)
           eventHandler.wait()
+          eventChannel.setStreamHandler(nil)
         }
         // If err is not nil, the block in coordinator is not executed.
         if let coordinatorErr = coordinatorErr {
