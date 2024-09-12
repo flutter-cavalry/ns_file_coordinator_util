@@ -8,7 +8,7 @@ NOTE: this plugin doesn't automatically call `startAccessingSecurityScopedResour
 
 ```dart
 /// Reads an iCloud [srcUrl] file and copies it to [destUrl].
-Future<void> readFile(String srcUrl, String destUrl);
+Future<Uint8List> readFile(String srcUrl);
 
 /// Returns information about the given [url].
 Future<NsFileCoordinatorEntity?> stat(String url);

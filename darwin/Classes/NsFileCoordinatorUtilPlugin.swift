@@ -39,9 +39,6 @@ class ResultWrapper<T> {
 public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
   static let fsResourceKeys: [URLResourceKey] = [.nameKey, .fileSizeKey, .isDirectoryKey, .contentModificationDateKey]
   
-  let pluginQueue = DispatchQueue.init(label: "ns_file_coordinator_util/queue")
-  let streamQueue = DispatchQueue.init(label: "ns_file_coordinator_util/stream_queue")
-  let coordinator = NSFileCoordinator()
   let binaryMessenger: FlutterBinaryMessenger
   
   public static func register(with registrar: FlutterPluginRegistrar) {
@@ -64,10 +61,10 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
       result(FlutterError(code: "InvalidArgsType", message: "Invalid args type", details: nil))
       return
     }
-    pluginQueue.async {
+    DispatchQueue.global().async {
       switch call.method {
       case "readFile":
-        guard let url = URL(string: args["src"] as! String), let destURL = URL(string: args["dest"] as! String) else {
+        guard let url = URL(string: args["src"] as! String) else {
           DispatchQueue.main.async {
             result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
           }
@@ -76,15 +73,15 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         
         let res = self.coordinateFSReading(url: url) { url in
           do {
-            try FileManager.default.copyItem(at: url, to: destURL)
-            return ResultWrapper.createResult(true)
+            let data = try Data(contentsOf: url)
+            return ResultWrapper.createResult(data)
           } catch {
             return ResultWrapper.createError(error)
           }
         }
         self.reportResult(result: result, data: res)
         
-      case "readFileAsync":
+      case "readFileStream":
         guard let url = URL(string: args["src"] as! String),
               let session = args["session"] as? Int
         else {
@@ -96,10 +93,11 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         let bufferSize = args["bufferSize"] as? Int ?? 4 * 1024 * 1024
         let debugDelay = args["debugDelay"] as? Double
         var coordinatorErr: NSError? = nil
-        self.coordinator.coordinate(readingItemAt: url, error: &coordinatorErr) { (url) in
+        NSFileCoordinator().coordinate(readingItemAt: url, error: &coordinatorErr) { (url) in
           // Returns immediately and let dart side start listening stream.
           result(nil)
-          let eventHandler = ReadFileHandler(url: url, bufferSize: bufferSize, queue: self.streamQueue, debugDelay: debugDelay)
+          let streamQueue = DispatchQueue.init(label: "ns_file_coordinator_util/stream_queue/\(session)")
+          let eventHandler = ReadFileHandler(url: url, bufferSize: bufferSize, queue: streamQueue, debugDelay: debugDelay)
           let eventChannel = FlutterEventChannel(name: "ns_file_coordinator_util/event/\(session)", binaryMessenger: self.binaryMessenger)
           eventChannel.setStreamHandler(eventHandler)
           eventHandler.wait()
@@ -341,7 +339,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
   private func coordinateFSDeleting<T>(url: URL, cb: (URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
     var coordinatorErr: NSError? = nil
     var res: ResultWrapper<T>?
-    coordinator.coordinate(writingItemAt: url, options: .forDeleting, error: &coordinatorErr) { (url) in
+    NSFileCoordinator().coordinate(writingItemAt: url, options: .forDeleting, error: &coordinatorErr) { (url) in
       res = cb(url)
     }
     return handleResultWrapperError(res, coordinatorErr: coordinatorErr)
@@ -350,7 +348,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
   private func coordinateFSWriting<T>(url: URL, cb: (URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
     var coordinatorErr: NSError? = nil
     var res: ResultWrapper<T>?
-    coordinator.coordinate(writingItemAt: url, error: &coordinatorErr) { (url) in
+    NSFileCoordinator().coordinate(writingItemAt: url, error: &coordinatorErr) { (url) in
       res = cb(url)
     }
     return handleResultWrapperError(res, coordinatorErr: coordinatorErr)
@@ -359,7 +357,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
   private func coordinateFSReading<T>(url: URL, cb: (URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
     var coordinatorErr: NSError? = nil
     var res: ResultWrapper<T>?
-    coordinator.coordinate(readingItemAt: url, error: &coordinatorErr) { (url) in
+    NSFileCoordinator().coordinate(readingItemAt: url, error: &coordinatorErr) { (url) in
       res = cb(url)
     }
     return handleResultWrapperError(res, coordinatorErr: coordinatorErr)
@@ -368,7 +366,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
   private func coordinateFSReadingAndWriting<T>(src: URL, dest: URL, cb: (URL, URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
     var coordinatorErr: NSError? = nil
     var res: ResultWrapper<T>?
-    coordinator.coordinate(readingItemAt: src, writingItemAt: dest, error: &coordinatorErr) { (src, dest) in
+    NSFileCoordinator().coordinate(readingItemAt: src, writingItemAt: dest, error: &coordinatorErr) { (src, dest) in
       res = cb(src, dest)
     }
     return handleResultWrapperError(res, coordinatorErr: coordinatorErr)
@@ -377,7 +375,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
   private func coordinateFSMoving<T>(src: URL, dest: URL, cb: (URL, URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
     var coordinatorErr: NSError? = nil
     var res: ResultWrapper<T>?
-    coordinator.coordinate(writingItemAt: src, options: .forMoving, writingItemAt: dest, options: .forReplacing, error: &coordinatorErr) { (src, dest) in
+    NSFileCoordinator().coordinate(writingItemAt: src, options: .forMoving, writingItemAt: dest, options: .forReplacing, error: &coordinatorErr) { (src, dest) in
       res = cb(src, dest)
     }
     return handleResultWrapperError(res, coordinatorErr: coordinatorErr)
@@ -447,7 +445,7 @@ class ReadFileHandler: NSObject, FlutterStreamHandler {
   func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
     // Use instance variable `eventSink` instead of `events`. Because when `onCancel` is called, `eventSink` is reset.
     self.eventSink = events
-    
+    // Don't block the main thread, reading happens on a queue.
     queue.async {
       if let stream = InputStream(url: self.url) {
         var buf = [UInt8](repeating: 0, count: self.bufferSize)

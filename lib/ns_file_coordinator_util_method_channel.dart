@@ -12,18 +12,21 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
   var _session = 0;
 
   @override
-  Future<void> readFile(String srcUrl, String destUrl) async {
-    await methodChannel.invokeMethod<void>('readFile', {
+  Future<Uint8List> readFile(String srcUrl) async {
+    final res = await methodChannel.invokeMethod<Uint8List>('readFile', {
       'src': srcUrl.toString(),
-      'dest': destUrl.toString(),
     });
+    if (res == null) {
+      throw Exception('Unexpected null result for file $srcUrl');
+    }
+    return res;
   }
 
   @override
-  Future<Stream<Uint8List>> readFileAsync(String srcUrl,
+  Future<Stream<Uint8List>> readFileStream(String srcUrl,
       {int? bufferSize, double? debugDelay}) async {
     var session = _nextSession();
-    await methodChannel.invokeMethod<dynamic>('readFileAsync', {
+    await methodChannel.invokeMethod<dynamic>('readFileStream', {
       'src': srcUrl.toString(),
       'bufferSize': bufferSize,
       'session': session,

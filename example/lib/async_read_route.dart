@@ -75,7 +75,7 @@ class _AsyncReadRouteState extends State<AsyncReadRoute> {
                                 setState(() {
                                   task.working = true;
                                 });
-                                final stream = await _plugin.readFileAsync(
+                                final stream = await _plugin.readFileStream(
                                     task.entity.url,
                                     bufferSize: 1024 * 300,
                                     debugDelay: 0.5);
@@ -86,12 +86,22 @@ class _AsyncReadRouteState extends State<AsyncReadRoute> {
                                   task.bytes!.add(bytes);
                                   setState(() {});
                                 }
-                                setState(() {
-                                  task.working = false;
-                                  task.cancelled = false;
-                                  task.doneMsg =
-                                      task.cancelled ? 'Cancelled' : 'Done';
-                                });
+                                if (task.cancelled) {
+                                  task.doneMsg = 'Cancelled';
+                                } else {
+                                  final expected =
+                                      await _plugin.readFile(task.entity.url);
+                                  final actual = task.bytes!.takeBytes();
+                                  if (!listEquals(actual, expected)) {
+                                    task.doneMsg = 'Error: Mismatch';
+                                  } else {
+                                    task.doneMsg =
+                                        'Async read: ${prettyBytes(actual.length.toDouble())}';
+                                  }
+                                }
+                                task.working = false;
+                                task.cancelled = false;
+                                setState(() {});
                               } catch (e) {
                                 task.working = false;
                                 task.cancelled = false;
@@ -113,6 +123,18 @@ class _AsyncReadRouteState extends State<AsyncReadRoute> {
                                 });
                               },
                         child: Text(task.cancelled ? 'Cancelling' : 'Cancel')),
+                    const SizedBox(
+                      width: 8,
+                    ),
+                    OutlinedButton(
+                        onPressed: () async {
+                          final bytes = await _plugin.readFile(task.entity.url);
+                          setState(() {
+                            task.doneMsg =
+                                'Sync read: ${prettyBytes(bytes.length.toDouble())}';
+                          });
+                        },
+                        child: const Text('Sync read')),
                   ],
                 ),
                 content,

@@ -199,17 +199,13 @@ class _MyHomeState extends State<MyHome> {
       }
       var fileAbsUrl =
           await _darwinUrlPlugin.append(dir, [fileRelPath], isDir: false);
-      var destPath = tmpPath();
-      var destUrl = await _darwinUrlPlugin.filePathToUrl(destPath);
 
       setState(() {
         _output = 'Reading/downloading $dir';
       });
-      await _plugin.readFile(fileAbsUrl, destUrl);
-
-      var length = await File(destPath).length();
+      final data = await _plugin.readFile(fileAbsUrl);
       setState(() {
-        _output = 'File written to $destPath with $length bytes';
+        _output = 'File content: ${data.length} bytes';
       });
     } catch (err) {
       setState(() {
