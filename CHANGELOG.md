@@ -1,3 +1,8 @@
+## 0.20.0
+
+- (**Breaking**) `readFile` now returns a `Uint8List`.
+- (**Breaking**) Add `readFileStream`.
+
 ## 0.15.0
 
 - Add `listContentFiles` to list only files in a directory.
