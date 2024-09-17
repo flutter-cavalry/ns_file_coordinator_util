@@ -8,6 +8,11 @@ class NsFileCoordinatorUtil {
     return NsFileCoordinatorUtilPlatform.instance.readFile(srcUrl);
   }
 
+  /// Writes the specified [data] to the iCloud [destUrl] file.
+  Future<void> writeFile(String destUrl, Uint8List data) {
+    return NsFileCoordinatorUtilPlatform.instance.writeFile(destUrl, data);
+  }
+
   /// Reads an iCloud [srcUrl] file and returns a stream of [Uint8List].
   Future<Stream<Uint8List>> readFileStream(String srcUrl,
       {int? bufferSize, double? debugDelay}) {
@@ -70,5 +75,22 @@ class NsFileCoordinatorUtil {
   /// Checks if the directory [url] is empty.
   Future<bool> isEmptyDirectory(String url) async {
     return NsFileCoordinatorUtilPlatform.instance.isEmptyDirectory(url);
+  }
+
+  /// Returns a session ID. Call [writeChunk] with the returned session to
+  /// write data into the destination stream. Call [endWriteStream] to close
+  /// the destination stream.
+  Future<int> startWriteStream(String url) async {
+    return NsFileCoordinatorUtilPlatform.instance.startWriteStream(url);
+  }
+
+  /// Writes the given [data] to an out stream identified by the given [session].
+  Future<void> writeChunk(int session, Uint8List data) async {
+    return NsFileCoordinatorUtilPlatform.instance.writeChunk(session, data);
+  }
+
+  /// Closes an out stream identified by the given [session].
+  Future<void> endWriteStream(int session) async {
+    return NsFileCoordinatorUtilPlatform.instance.endWriteStream(session);
   }
 }

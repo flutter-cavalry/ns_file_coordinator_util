@@ -39,7 +39,8 @@ class ResultWrapper<T> {
 public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
   static let fsResourceKeys: [URLResourceKey] = [.nameKey, .fileSizeKey, .isDirectoryKey, .contentModificationDateKey]
   
-  let binaryMessenger: FlutterBinaryMessenger
+  private let binaryMessenger: FlutterBinaryMessenger
+  private var writeStreams: [Int: WriteFileHandler]
   
   public static func register(with registrar: FlutterPluginRegistrar) {
 #if os(iOS)
@@ -54,6 +55,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
   
   init(binaryMessenger: FlutterBinaryMessenger) {
     self.binaryMessenger = binaryMessenger
+    self.writeStreams = [:]
   }
   
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -96,7 +98,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         NSFileCoordinator().coordinate(readingItemAt: url, error: &coordinatorErr) { (url) in
           // Returns immediately and let dart side start listening stream.
           result(nil)
-          let streamQueue = DispatchQueue.init(label: "ns_file_coordinator_util/stream_queue/\(session)")
+          let streamQueue = DispatchQueue.init(label: "ns_file_coordinator_util/r/\(session)")
           let eventHandler = ReadFileHandler(url: url, bufferSize: bufferSize, queue: streamQueue, debugDelay: debugDelay)
           let eventChannel = FlutterEventChannel(name: "ns_file_coordinator_util/event/\(session)", binaryMessenger: self.binaryMessenger)
           eventChannel.setStreamHandler(eventHandler)
@@ -287,6 +289,76 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         }
         self.reportResult(result: result, data: res)
         
+      case "writeFile":
+        guard let url = URL(string: args["url"] as! String) else {
+          DispatchQueue.main.async {
+            result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
+          }
+          return
+        }
+        let dartData = args["data"] as! FlutterStandardTypedData
+        
+        let res = self.coordinateFSWriting(url: url) { url in
+          do {
+            try dartData.data.write(to: url)
+            return ResultWrapper.createResult(true)
+          } catch {
+            return ResultWrapper.createError(error)
+          }
+        }
+        self.reportResult(result: result, data: res)
+        
+      case "startWriteStream":
+        guard let url = URL(string: args["url"] as! String) else {
+          DispatchQueue.main.async {
+            result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
+          }
+          return
+        }
+        let session = args["session"] as! Int;
+        
+        var coordinatorErr: NSError? = nil
+        NSFileCoordinator().coordinate(readingItemAt: url, error: &coordinatorErr) { (url) in
+          let streamQueue = DispatchQueue.init(label: "ns_file_coordinator_util/w/\(session)")
+          let writeHandler = WriteFileHandler(url: url, queue: streamQueue)
+          self.writeStreams[session] = writeHandler
+          // Return before waiting (unblock dart caller).
+          result(nil)
+          writeHandler.wait()
+          // Clean up.
+          self.writeStreams.removeValue(forKey: session)
+          // Unblock dart `endWriteStream` call.
+          writeHandler.endResult?(nil)
+        }
+        // If err is not nil, the block in coordinator is not executed.
+        if let coordinatorErr = coordinatorErr {
+          result(FlutterError(code: "PluginError", message: coordinatorErr.localizedDescription, details: nil))
+        }
+        
+      case "writeChunk":
+        let session = args["session"] as! Int
+        let dartData = args["data"] as! FlutterStandardTypedData
+        let data = dartData.data
+        guard let writer = self.writeStreams[session] else {
+          DispatchQueue.main.async {
+            result(FlutterError(code: "ArgError", message: "Session not found", details: nil))
+          }
+          return
+        }
+        writer.writeData(data, writeResult: result)
+        
+      case "endWriteStream":
+        let session = args["session"] as! Int
+        guard let writer = self.writeStreams[session] else {
+          DispatchQueue.main.async {
+            result(FlutterError(code: "ArgError", message: "Session not found", details: nil))
+          }
+          return
+        }
+        // This will free the semaphore and unblock the write queue in `startWriteStream`.
+        // `result` will get called in `startWriteStream` block.
+        writer.endWrite(endResult: result)
+        
       case "isEmptyDirectory":
         guard let url = URL(string: args["url"] as! String) else {
           DispatchQueue.main.async {
@@ -474,5 +546,70 @@ class ReadFileHandler: NSObject, FlutterStreamHandler {
     self.isCancelled = true
     // Don't cancel semaphore here. It will be handled in `onListen`.
     return nil
+  }
+}
+
+class WriteFileHandler: NSObject {
+  let url: URL
+  let queue: DispatchQueue
+  var endResult: FlutterResult?
+  
+  private let semaphore = DispatchSemaphore(value: 0)
+  
+  init(url: URL, queue: DispatchQueue) {
+    self.url = url
+    self.queue = queue
+  }
+  
+  // This is called from plugin thread.
+  func wait() {
+    semaphore.wait()  // Block the calling thread
+  }
+  
+  // Called from main thread.
+  func writeData(_ data: Data, writeResult: @escaping FlutterResult) {
+    // Don't block the main thread, writing happens on a queue.
+    queue.async {
+      do {
+        try data.append(fileURL: self.url)
+        DispatchQueue.main.async {
+          writeResult(nil)
+        }
+      } catch {
+        DispatchQueue.main.async {
+          writeResult(FlutterError(code: "WriteError", message: error.localizedDescription, details: nil))
+        }
+      }
+    }
+  }
+  
+  func endWrite(endResult: @escaping FlutterResult) {
+    self.endResult = endResult
+    self.semaphore.signal()
+  }
+}
+
+class WriteFileStreamResult {
+  let isCancelled: Bool?
+  let error: String?
+  
+  init(isCancelled: Bool?, error: String?) {
+    self.isCancelled = isCancelled
+    self.error = error
+  }
+}
+
+extension Data {
+  func append(fileURL: URL) throws {
+    if let fileHandle = FileHandle(forWritingAtPath: fileURL.path) {
+      defer {
+        fileHandle.closeFile()
+      }
+      fileHandle.seekToEndOfFile()
+      fileHandle.write(self)
+    }
+    else {
+      try write(to: fileURL, options: .atomic)
+    }
   }
 }

@@ -99,6 +99,10 @@ abstract class NsFileCoordinatorUtilPlatform extends PlatformInterface {
     throw UnimplementedError('readFile() has not been implemented.');
   }
 
+  Future<void> writeFile(String destUrl, Uint8List data) {
+    throw UnimplementedError('writeFile() has not been implemented.');
+  }
+
   Future<Stream<Uint8List>> readFileStream(String srcUrl,
       {int? bufferSize, double? debugDelay}) {
     throw UnimplementedError('readFileStream() has not been implemented.');
@@ -139,5 +143,17 @@ abstract class NsFileCoordinatorUtilPlatform extends PlatformInterface {
 
   Future<bool> isEmptyDirectory(String url) async {
     throw UnimplementedError('isEmptyDirectory() has not been implemented.');
+  }
+
+  Future<int> startWriteStream(String url) async {
+    throw UnimplementedError('startWriteStream() has not been implemented.');
+  }
+
+  Future<void> writeChunk(int session, Uint8List data) async {
+    throw UnimplementedError('writeChunk() has not been implemented.');
+  }
+
+  Future<void> endWriteStream(int session) async {
+    throw UnimplementedError('endWriteStream() has not been implemented.');
   }
 }

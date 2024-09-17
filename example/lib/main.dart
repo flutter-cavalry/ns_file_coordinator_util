@@ -13,6 +13,7 @@ import 'dart:async';
 
 import 'package:ns_file_coordinator_util/ns_file_coordinator_util.dart';
 import 'package:ns_file_coordinator_util_example/async_read_route.dart';
+import 'package:ns_file_coordinator_util_example/async_write_route.dart';
 import 'package:tmp_path/tmp_path.dart';
 import 'package:path/path.dart' as p;
 
@@ -90,6 +91,19 @@ class _MyHomeState extends State<MyHome> {
                                   AsyncReadRoute(dirUrl: _icloudFolder!)));
                     },
                     child: const Text('Read file async tests')),
+                _sep(),
+                OutlinedButton(
+                    onPressed: () async {
+                      if (_icloudFolder == null) {
+                        return;
+                      }
+                      await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  AsyncWriteRoute(dirUrl: _icloudFolder!)));
+                    },
+                    child: const Text('Write file async tests')),
                 _sep(),
                 if (_icloudFolder != null)
                   Text('iCloud folder: $_icloudFolder'),

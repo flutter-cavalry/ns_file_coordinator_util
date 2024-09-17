@@ -23,6 +23,14 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
   }
 
   @override
+  Future<void> writeFile(String destUrl, Uint8List data) async {
+    await methodChannel.invokeMethod<bool>('writeFile', {
+      'url': destUrl.toString(),
+      'data': data,
+    });
+  }
+
+  @override
   Future<Stream<Uint8List>> readFileStream(String srcUrl,
       {int? bufferSize, double? debugDelay}) async {
     var session = _nextSession();
@@ -112,6 +120,31 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
     return await methodChannel
             .invokeMethod<bool>('isEmptyDirectory', {'url': url.toString()}) ??
         false;
+  }
+
+  @override
+  Future<int> startWriteStream(String url) async {
+    var session = _nextSession();
+    await methodChannel.invokeMethod('startWriteStream', {
+      'url': url,
+      'session': session,
+    });
+    return session;
+  }
+
+  @override
+  Future<void> writeChunk(int session, Uint8List data) async {
+    await methodChannel.invokeMethod('writeChunk', {
+      'session': session,
+      'data': data,
+    });
+  }
+
+  @override
+  Future<void> endWriteStream(int session) async {
+    await methodChannel.invokeMethod('endWriteStream', {
+      'session': session,
+    });
   }
 
   int _nextSession() {

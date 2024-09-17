@@ -92,7 +92,7 @@ class _AsyncReadRouteState extends State<AsyncReadRoute> {
                                   final expected =
                                       await _plugin.readFile(task.entity.url);
                                   final actual = task.bytes!.takeBytes();
-                                  if (!listEquals(actual, expected)) {
+                                  if (!_listEquals(actual, expected)) {
                                     task.doneMsg = 'Error: Mismatch';
                                   } else {
                                     task.doneMsg =
@@ -160,7 +160,7 @@ class _AsyncReadRouteState extends State<AsyncReadRoute> {
   }
 }
 
-bool listEquals<E>(List<E> list1, List<E> list2) {
+bool _listEquals<E>(List<E> list1, List<E> list2) {
   if (identical(list1, list2)) {
     return true;
   }
