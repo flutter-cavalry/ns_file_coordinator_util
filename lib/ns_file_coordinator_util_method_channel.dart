@@ -147,6 +147,14 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
     });
   }
 
+  @override
+  Future<List<int>> getPendingWritingSessions() async {
+    // The empty map is needed to avoid a platform channel args error.
+    return await methodChannel
+            .invokeListMethod<int>('getPendingWritingSessions', {}) ??
+        [];
+  }
+
   int _nextSession() {
     return ++_session;
   }

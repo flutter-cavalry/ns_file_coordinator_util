@@ -41,6 +41,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
   
   private let binaryMessenger: FlutterBinaryMessenger
   private var writeStreams: [Int: WriteFileHandler]
+  private let writeStreamMapQueue = DispatchQueue(label: "ns_file_coordinator_util/write_stream_map")
   
   public static func register(with registrar: FlutterPluginRegistrar) {
 #if os(iOS)
@@ -96,8 +97,10 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         let debugDelay = args["debugDelay"] as? Double
         var coordinatorErr: NSError? = nil
         NSFileCoordinator().coordinate(readingItemAt: url, error: &coordinatorErr) { (url) in
-          // Returns immediately and let dart side start listening stream.
-          result(nil)
+          DispatchQueue.main.async {
+            // Returns immediately and let dart side start listening stream.
+            result(nil)
+          }
           let streamQueue = DispatchQueue.init(label: "ns_file_coordinator_util/r/\(session)")
           let eventHandler = ReadFileHandler(url: url, bufferSize: bufferSize, queue: streamQueue, debugDelay: debugDelay)
           let eventChannel = FlutterEventChannel(name: "ns_file_coordinator_util/event/\(session)", binaryMessenger: self.binaryMessenger)
@@ -107,7 +110,9 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         }
         // If err is not nil, the block in coordinator is not executed.
         if let coordinatorErr = coordinatorErr {
-          result(FlutterError(code: "PluginError", message: coordinatorErr.localizedDescription, details: nil))
+          DispatchQueue.main.async {
+            result(FlutterError(code: "PluginError", message: coordinatorErr.localizedDescription, details: nil))
+          }
         }
         
       case "stat":
@@ -321,25 +326,39 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         NSFileCoordinator().coordinate(readingItemAt: url, error: &coordinatorErr) { (url) in
           let streamQueue = DispatchQueue.init(label: "ns_file_coordinator_util/w/\(session)")
           let writeHandler = WriteFileHandler(url: url, queue: streamQueue)
-          self.writeStreams[session] = writeHandler
-          // Return before waiting (unblock dart caller).
-          result(nil)
+          self.writeStreamMapQueue.sync {
+            self.writeStreams[session] = writeHandler
+          }
+          DispatchQueue.main.async {
+            // Return before waiting (unblock dart caller).
+            result(nil)
+          }
           writeHandler.wait()
           // Clean up.
-          self.writeStreams.removeValue(forKey: session)
-          // Unblock dart `endWriteStream` call.
-          writeHandler.endResult?(nil)
+          _ = self.writeStreamMapQueue.sync {
+            self.writeStreams.removeValue(forKey: session)
+          }
+          DispatchQueue.main.async {
+            // Unblock dart `endWriteStream` call.
+            writeHandler.endResult?(nil)
+          }
         }
         // If err is not nil, the block in coordinator is not executed.
         if let coordinatorErr = coordinatorErr {
-          result(FlutterError(code: "PluginError", message: coordinatorErr.localizedDescription, details: nil))
+          DispatchQueue.main.async {
+            result(FlutterError(code: "PluginError", message: coordinatorErr.localizedDescription, details: nil))
+          }
         }
         
       case "writeChunk":
         let session = args["session"] as! Int
         let dartData = args["data"] as! FlutterStandardTypedData
         let data = dartData.data
-        guard let writer = self.writeStreams[session] else {
+        let writer = self.writeStreamMapQueue.sync {
+          self.writeStreams[session]
+        }
+        
+        guard let writer = writer else {
           DispatchQueue.main.async {
             result(FlutterError(code: "ArgError", message: "Session not found", details: nil))
           }
@@ -349,7 +368,12 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         
       case "endWriteStream":
         let session = args["session"] as! Int
-        guard let writer = self.writeStreams[session] else {
+        
+        let writer = self.writeStreamMapQueue.sync {
+          self.writeStreams[session]
+        }
+          
+        guard let writer = writer else {
           DispatchQueue.main.async {
             result(FlutterError(code: "ArgError", message: "Session not found", details: nil))
           }
@@ -358,6 +382,15 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         // This will free the semaphore and unblock the write queue in `startWriteStream`.
         // `result` will get called in `startWriteStream` block.
         writer.endWrite(endResult: result)
+        
+      case "getPendingWritingSessions":
+        let keys = self.writeStreamMapQueue.sync {
+          Array(self.writeStreams.keys)
+        }
+
+        DispatchQueue.main.async {
+          result(keys)
+        }
         
       case "isEmptyDirectory":
         guard let url = URL(string: args["url"] as! String) else {

@@ -51,6 +51,7 @@ class _AsyncWriteRouteState extends State<AsyncWriteRoute> {
   final _plugin = NsFileCoordinatorUtil();
   final _darwinUrl = DarwinUrl();
   final _tasks = <AsyncWriteTask>[];
+  var _pendingSessions = '';
 
   String _nextFileName(String prefix) {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -59,103 +60,122 @@ class _AsyncWriteRouteState extends State<AsyncWriteRoute> {
 
   @override
   Widget build(BuildContext context) {
-    final body = Padding(
-        padding: const EdgeInsets.all(8),
-        child: ListView.builder(
-          itemCount: _tasks.length,
-          itemBuilder: (context, index) {
-            final task = _tasks[index];
-            Widget content;
-            if (task.doneMsg == null) {
-              content = Text('🟢 ${task.progress?.toStringAsFixed(2)}');
-            } else {
-              content = Text(task.doneMsg ?? '');
-            }
-            Widget w = Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    final body = ListView.builder(
+      itemCount: _tasks.length,
+      itemBuilder: (context, index) {
+        final task = _tasks[index];
+        Widget content;
+        if (task.doneMsg == null) {
+          content = Text('🟢 ${task.progress?.toStringAsFixed(2)}');
+        } else {
+          content = Text(task.doneMsg ?? '');
+        }
+        Widget w = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                Row(
-                  children: [
-                    Expanded(child: Text(task.name)),
-                    OutlinedButton(
-                        onPressed: task.progress == null ||
-                                task.doneMsg != null ||
-                                task.cancelled
-                            ? null
-                            : () {
-                                setState(() {
-                                  task.cancelled = true;
-                                });
-                              },
-                        child: Text(task.cancelled ? 'Cancelling' : 'Cancel')),
-                  ],
-                ),
-                content,
+                Expanded(child: Text(task.name)),
+                OutlinedButton(
+                    onPressed: task.progress == null ||
+                            task.doneMsg != null ||
+                            task.cancelled
+                        ? null
+                        : () {
+                            setState(() {
+                              task.cancelled = true;
+                            });
+                          },
+                    child: Text(task.cancelled ? 'Cancelling' : 'Cancel')),
               ],
-            );
-            w = Padding(padding: const EdgeInsets.all(8), child: w);
-            return w;
-          },
-        ));
+            ),
+            content,
+          ],
+        );
+        w = Padding(padding: const EdgeInsets.all(8), child: w);
+        return w;
+      },
+    );
     return Scaffold(
       appBar: AppBar(
         title: const Text('Plugin example app'),
       ),
-      body: Column(
-        children: [
-          const Text(
-              'NOTE: All read operations have a 0.5s delay for debugging.',
-              style: TextStyle(color: Colors.red)),
-          const SizedBox(
-            height: 8,
-          ),
-          Row(
+      body: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Column(
             children: [
+              const Text(
+                  'NOTE: All read operations have a 0.5s delay for debugging.',
+                  style: TextStyle(color: Colors.red)),
               const SizedBox(
-                width: 8,
+                height: 8,
               ),
-              OutlinedButton(
-                  onPressed: () async {
-                    final fileName = _nextFileName('w_async');
-                    final url = await _darwinUrl
-                        .append(widget.dirUrl, [fileName], isDir: false);
-                    final task = AsyncWriteTask(fileName, url);
-                    setState(() {
-                      _tasks.add(task);
-                    });
-                    await task.write(_plugin, () {
-                      setState(() {});
-                    });
-                  },
-                  child: const Text('Write async')),
+              Row(
+                children: [
+                  const SizedBox(
+                    width: 8,
+                  ),
+                  OutlinedButton(
+                      onPressed: () async {
+                        final sessions =
+                            await _plugin.getPendingWritingSessions();
+                        setState(() {
+                          _pendingSessions =
+                              sessions.isEmpty ? '<none>' : sessions.toString();
+                        });
+                      },
+                      child: const Text('Get pending write sessions')),
+                  const SizedBox(
+                    width: 8,
+                  ),
+                  OutlinedButton(
+                      onPressed: () async {
+                        final fileName = _nextFileName('w_async');
+                        final url = await _darwinUrl
+                            .append(widget.dirUrl, [fileName], isDir: false);
+                        final task = AsyncWriteTask(fileName, url);
+                        setState(() {
+                          _tasks.add(task);
+                        });
+                        await task.write(_plugin, () {
+                          setState(() {});
+                        });
+                      },
+                      child: const Text('Write async')),
+                  const SizedBox(
+                    width: 8,
+                  ),
+                  OutlinedButton(
+                      onPressed: () async {
+                        try {
+                          final fileName = _nextFileName('w_sync');
+                          final url = await _darwinUrl
+                              .append(widget.dirUrl, [fileName], isDir: false);
+                          await _plugin.writeFile(
+                              url, utf8.encode('Hello, world!'));
+                          if (!context.mounted) {
+                            return;
+                          }
+                          showInfoAlert(context, 'File written: $url');
+                        } catch (e) {
+                          showErrorAlert(context, e);
+                        }
+                      },
+                      child: const Text('Write sync'))
+                ],
+              ),
+              if (_pendingSessions.isNotEmpty) ...[
+                const SizedBox(
+                  height: 8,
+                ),
+                Text('Pending sessions: $_pendingSessions'),
+              ],
               const SizedBox(
-                width: 8,
+                height: 8,
               ),
-              OutlinedButton(
-                  onPressed: () async {
-                    try {
-                      final fileName = _nextFileName('w_sync');
-                      final url = await _darwinUrl
-                          .append(widget.dirUrl, [fileName], isDir: false);
-                      await _plugin.writeFile(
-                          url, utf8.encode('Hello, world!'));
-                      if (!context.mounted) {
-                        return;
-                      }
-                      showInfoAlert(context, 'File written: $url');
-                    } catch (e) {
-                      showErrorAlert(context, e);
-                    }
-                  },
-                  child: const Text('Write sync'))
+              Expanded(child: body),
             ],
-          ),
-          const SizedBox(
-            height: 8,
-          ),
-          Expanded(child: body),
-        ],
-      ),
+          )),
     );
   }
 }

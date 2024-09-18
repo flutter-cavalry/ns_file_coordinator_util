@@ -156,4 +156,9 @@ abstract class NsFileCoordinatorUtilPlatform extends PlatformInterface {
   Future<void> endWriteStream(int session) async {
     throw UnimplementedError('endWriteStream() has not been implemented.');
   }
+
+  Future<List<int>> getPendingWritingSessions() async {
+    throw UnimplementedError(
+        'getPendingWritingSessions() has not been implemented.');
+  }
 }

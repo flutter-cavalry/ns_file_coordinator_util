@@ -93,4 +93,9 @@ class NsFileCoordinatorUtil {
   Future<void> endWriteStream(int session) async {
     return NsFileCoordinatorUtilPlatform.instance.endWriteStream(session);
   }
+
+  /// Returns a list of pending writing sessions.
+  Future<List<int>> getPendingWritingSessions() async {
+    return NsFileCoordinatorUtilPlatform.instance.getPendingWritingSessions();
+  }
 }
