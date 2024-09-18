@@ -40,8 +40,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
   static let fsResourceKeys: [URLResourceKey] = [.nameKey, .fileSizeKey, .isDirectoryKey, .contentModificationDateKey]
   
   private let binaryMessenger: FlutterBinaryMessenger
-  private var writeStreams: [Int: WriteFileHandler]
-  private let writeStreamMapQueue = DispatchQueue(label: "ns_file_coordinator_util/write_stream_map")
+  private var writeStreams: [Int: WriteFileHandler] = [:]
   
   public static func register(with registrar: FlutterPluginRegistrar) {
 #if os(iOS)
@@ -56,7 +55,6 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
   
   init(binaryMessenger: FlutterBinaryMessenger) {
     self.binaryMessenger = binaryMessenger
-    self.writeStreams = [:]
   }
   
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -64,16 +62,14 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
       result(FlutterError(code: "InvalidArgsType", message: "Invalid args type", details: nil))
       return
     }
-    DispatchQueue.global().async {
-      switch call.method {
-      case "readFile":
-        guard let url = URL(string: args["src"] as! String) else {
-          DispatchQueue.main.async {
-            result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
-          }
-          return
-        }
-        
+    switch call.method {
+    case "readFile":
+      guard let url = URL(string: args["src"] as! String) else {
+        result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
+        return
+      }
+      
+      DispatchQueue.global().async {
         let res = self.coordinateFSReading(url: url) { url in
           do {
             let data = try Data(contentsOf: url)
@@ -83,18 +79,19 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           }
         }
         self.reportResult(result: result, data: res)
-        
-      case "readFileStream":
-        guard let url = URL(string: args["src"] as! String),
-              let session = args["session"] as? Int
-        else {
-          DispatchQueue.main.async {
-            result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
-          }
-          return
-        }
-        let bufferSize = args["bufferSize"] as? Int ?? 4 * 1024 * 1024
-        let debugDelay = args["debugDelay"] as? Double
+      }
+      
+    case "readFileStream":
+      guard let url = URL(string: args["src"] as! String),
+            let session = args["session"] as? Int
+      else {
+        result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
+        return
+      }
+      let bufferSize = args["bufferSize"] as? Int ?? 4 * 1024 * 1024
+      let debugDelay = args["debugDelay"] as? Double
+      
+      DispatchQueue.global().async {
         var coordinatorErr: NSError? = nil
         NSFileCoordinator().coordinate(readingItemAt: url, error: &coordinatorErr) { (url) in
           DispatchQueue.main.async {
@@ -114,32 +111,32 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
             result(FlutterError(code: "PluginError", message: coordinatorErr.localizedDescription, details: nil))
           }
         }
-        
-      case "stat":
-        guard let url = URL(string: args["url"] as! String) else {
-          DispatchQueue.main.async {
-            result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
-          }
-          return
-        }
-        
+      }
+      
+    case "stat":
+      guard let url = URL(string: args["url"] as! String) else {
+        result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
+        return
+      }
+      
+      DispatchQueue.global().async {
         let res = self.coordinateFSReading(url: url) { url in
           let statMap = try? self.fsStat(url: url, relativePath: false)
           return ResultWrapper.createResult(statMap)
         }
         self.reportResult(result: result, data: res)
-        
-      case "listContents":
-        guard let url = URL(string: args["url"] as! String) else {
-          DispatchQueue.main.async {
-            result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
-          }
-          return
-        }
-        let recursive = args["recursive"] as? Bool ?? false
-        let filesOnly = args["filesOnly"] as? Bool ?? false
-        let relativePathInfo = args["relativePathInfo"] as? Bool ?? false
-        
+      }
+      
+    case "listContents":
+      guard let url = URL(string: args["url"] as! String) else {
+        result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
+        return
+      }
+      let recursive = args["recursive"] as? Bool ?? false
+      let filesOnly = args["filesOnly"] as? Bool ?? false
+      let relativePathInfo = args["relativePathInfo"] as? Bool ?? false
+      
+      DispatchQueue.global().async {
         let res = self.coordinateFSReading(url: url) { url in
           do {
             var contentURLs: [URL]
@@ -174,15 +171,15 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           }
         }
         self.reportResult(result: result, data: res)
-        
-      case "listContentFiles":
-        guard let url = URL(string: args["url"] as! String) else {
-          DispatchQueue.main.async {
-            result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
-          }
-          return
-        }
-        
+      }
+      
+    case "listContentFiles":
+      guard let url = URL(string: args["url"] as! String) else {
+        result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
+        return
+      }
+      
+      DispatchQueue.global().async {
         let res = self.coordinateFSReading(url: url) { url in
           var contentURLs: [URL]
           var urls = [URL]()
@@ -205,15 +202,15 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           return ResultWrapper.createResult(statMaps)
         }
         self.reportResult(result: result, data: res)
-        
-      case "delete":
-        guard let url = URL(string: args["url"] as! String) else {
-          DispatchQueue.main.async {
-            result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
-          }
-          return
-        }
-        
+      }
+      
+    case "delete":
+      guard let url = URL(string: args["url"] as! String) else {
+        result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
+        return
+      }
+      
+      DispatchQueue.global().async {
         let res = self.coordinateFSDeleting(url: url) { url in
           do {
             try FileManager.default.removeItem(at: url)
@@ -223,15 +220,15 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           }
         }
         self.reportResult(result: result, data: res)
-        
-      case "move":
-        guard let srcURL = URL(string: args["src"] as! String), let destURL = URL(string: args["dest"] as! String) else {
-          DispatchQueue.main.async {
-            result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
-          }
-          return
-        }
-        
+      }
+      
+    case "move":
+      guard let srcURL = URL(string: args["src"] as! String), let destURL = URL(string: args["dest"] as! String) else {
+        result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
+        return
+      }
+      
+      DispatchQueue.global().async {
         let res = self.coordinateFSMoving(src: srcURL, dest: destURL) { srcURL, destURL in
           do {
             try FileManager.default.moveItem(at: srcURL, to: destURL)
@@ -241,15 +238,15 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           }
         }
         self.reportResult(result: result, data: res)
-        
-      case "copyPath":
-        guard let srcURL = URL(string: args["src"] as! String), let destURL = URL(string: args["dest"] as! String) else {
-          DispatchQueue.main.async {
-            result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
-          }
-          return
-        }
-        
+      }
+      
+    case "copyPath":
+      guard let srcURL = URL(string: args["src"] as! String), let destURL = URL(string: args["dest"] as! String) else {
+        result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
+        return
+      }
+      
+      DispatchQueue.global().async {
         let res = self.coordinateFSReadingAndWriting(src: srcURL, dest: destURL) { srcURL, destURL in
           do {
             try FileManager.default.createDirectory(at: destURL.deletingLastPathComponent(), withIntermediateDirectories: true)
@@ -260,30 +257,30 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           }
         }
         self.reportResult(result: result, data: res)
-        
-      case "isDirectory":
-        guard let url = URL(string: args["url"] as! String) else {
-          DispatchQueue.main.async {
-            result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
-          }
-          return
-        }
-        
+      }
+      
+    case "isDirectory":
+      guard let url = URL(string: args["url"] as! String) else {
+        result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
+        return
+      }
+      
+      DispatchQueue.global().async {
         let res = self.coordinateFSReading(url: url) { url in
           var isDirectory: ObjCBool = false
           let exists = FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory)
           return ResultWrapper.createResult(exists ? isDirectory.boolValue : nil)
         }
         self.reportResult(result: result, data: res)
-        
-      case "mkdir":
-        guard let url = URL(string: args["url"] as! String) else {
-          DispatchQueue.main.async {
-            result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
-          }
-          return
-        }
-        
+      }
+      
+    case "mkdir":
+      guard let url = URL(string: args["url"] as! String) else {
+        result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
+        return
+      }
+      
+      DispatchQueue.global().async {
         let res = self.coordinateFSWriting(url: url) { url in
           do {
             try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
@@ -293,16 +290,16 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           }
         }
         self.reportResult(result: result, data: res)
-        
-      case "writeFile":
-        guard let url = URL(string: args["url"] as! String) else {
-          DispatchQueue.main.async {
-            result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
-          }
-          return
-        }
-        let dartData = args["data"] as! FlutterStandardTypedData
-        
+      }
+      
+    case "writeFile":
+      guard let url = URL(string: args["url"] as! String) else {
+        result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
+        return
+      }
+      let dartData = args["data"] as! FlutterStandardTypedData
+      
+      DispatchQueue.global().async {
         let res = self.coordinateFSWriting(url: url) { url in
           do {
             try dartData.data.write(to: url)
@@ -312,33 +309,30 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           }
         }
         self.reportResult(result: result, data: res)
-        
-      case "startWriteStream":
-        guard let url = URL(string: args["url"] as! String) else {
-          DispatchQueue.main.async {
-            result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
-          }
-          return
-        }
-        let session = args["session"] as! Int;
-        
+      }
+      
+    case "startWriteStream":
+      guard let url = URL(string: args["url"] as! String) else {
+        result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
+        return
+      }
+      let session = args["session"] as! Int;
+      
+      let streamQueue = DispatchQueue.init(label: "ns_file_coordinator_util/w/\(session)")
+      let writeHandler = WriteFileHandler(url: url, queue: streamQueue)
+      writeStreams[session] = writeHandler
+      
+      DispatchQueue.global().async {
         var coordinatorErr: NSError? = nil
         NSFileCoordinator().coordinate(readingItemAt: url, error: &coordinatorErr) { (url) in
-          let streamQueue = DispatchQueue.init(label: "ns_file_coordinator_util/w/\(session)")
-          let writeHandler = WriteFileHandler(url: url, queue: streamQueue)
-          self.writeStreamMapQueue.sync {
-            self.writeStreams[session] = writeHandler
-          }
           DispatchQueue.main.async {
             // Return before waiting (unblock dart caller).
             result(nil)
           }
           writeHandler.wait()
           // Clean up.
-          _ = self.writeStreamMapQueue.sync {
-            self.writeStreams.removeValue(forKey: session)
-          }
           DispatchQueue.main.async {
+            self.writeStreams.removeValue(forKey: session)
             // Unblock dart `endWriteStream` call.
             writeHandler.endResult?(nil)
           }
@@ -349,57 +343,42 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
             result(FlutterError(code: "PluginError", message: coordinatorErr.localizedDescription, details: nil))
           }
         }
-        
-      case "writeChunk":
-        let session = args["session"] as! Int
-        let dartData = args["data"] as! FlutterStandardTypedData
-        let data = dartData.data
-        let writer = self.writeStreamMapQueue.sync {
-          self.writeStreams[session]
-        }
-        
-        guard let writer = writer else {
-          DispatchQueue.main.async {
-            result(FlutterError(code: "ArgError", message: "Session not found", details: nil))
-          }
-          return
-        }
-        writer.writeData(data, writeResult: result)
-        
-      case "endWriteStream":
-        let session = args["session"] as! Int
-        
-        let writer = self.writeStreamMapQueue.sync {
-          self.writeStreams[session]
-        }
-          
-        guard let writer = writer else {
-          DispatchQueue.main.async {
-            result(FlutterError(code: "ArgError", message: "Session not found", details: nil))
-          }
-          return
-        }
-        // This will free the semaphore and unblock the write queue in `startWriteStream`.
-        // `result` will get called in `startWriteStream` block.
-        writer.endWrite(endResult: result)
-        
-      case "getPendingWritingSessions":
-        let keys = self.writeStreamMapQueue.sync {
-          Array(self.writeStreams.keys)
-        }
-
-        DispatchQueue.main.async {
-          result(keys)
-        }
-        
-      case "isEmptyDirectory":
-        guard let url = URL(string: args["url"] as! String) else {
-          DispatchQueue.main.async {
-            result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
-          }
-          return
-        }
-        
+      }
+      
+    case "writeChunk":
+      let session = args["session"] as! Int
+      let dartData = args["data"] as! FlutterStandardTypedData
+      let data = dartData.data
+      guard let writer = self.writeStreams[session] else {
+        result(FlutterError(code: "ArgError", message: "Session not found", details: nil))
+        return
+      }
+      
+      DispatchQueue.global().async {
+        writer.writeDataAsync(data, writeResult: result)
+      }
+      
+    case "endWriteStream":
+      let session = args["session"] as! Int
+      guard let writer = self.writeStreams[session] else {
+        result(FlutterError(code: "ArgError", message: "Session not found", details: nil))
+        return
+      }
+      // This will free the semaphore and unblock the write queue in `startWriteStream`.
+      // `result` will get called in `startWriteStream` block.
+      writer.endWrite(endResult: result)
+      
+    case "getPendingWritingSessions":
+      let keys = Array(self.writeStreams.keys)
+      result(keys)
+      
+    case "isEmptyDirectory":
+      guard let url = URL(string: args["url"] as! String) else {
+        result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
+        return
+      }
+      
+      DispatchQueue.global().async {
         let res = self.coordinateFSReading(url: url, cb: { url in
           do {
             let contentURLs = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: [])
@@ -410,11 +389,11 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           }
         })
         self.reportResult(result: result, data: res)
-        
-      default:
-        DispatchQueue.main.async {
-          result(FlutterMethodNotImplemented)
-        }
+      }
+      
+    default:
+      DispatchQueue.main.async {
+        result(FlutterMethodNotImplemented)
       }
     }
   }
@@ -600,7 +579,7 @@ class WriteFileHandler: NSObject {
   }
   
   // Called from main thread.
-  func writeData(_ data: Data, writeResult: @escaping FlutterResult) {
+  func writeDataAsync(_ data: Data, writeResult: @escaping FlutterResult) {
     // Don't block the main thread, writing happens on a queue.
     queue.async {
       do {
