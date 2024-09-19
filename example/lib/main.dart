@@ -217,7 +217,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Reading/downloading $dir';
       });
-      final data = await _plugin.readFile(fileAbsUrl);
+      final data = await _plugin.readFileSync(fileAbsUrl);
       setState(() {
         _output = 'File content: ${data.length} bytes';
       });

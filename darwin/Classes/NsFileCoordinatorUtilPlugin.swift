@@ -63,7 +63,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
       return
     }
     switch call.method {
-    case "readFile":
+    case "readFileSync":
       guard let url = URL(string: args["src"] as! String) else {
         result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
         return
@@ -90,6 +90,10 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
       }
       let bufferSize = args["bufferSize"] as? Int ?? 4 * 1024 * 1024
       let debugDelay = args["debugDelay"] as? Double
+      let streamQueue = DispatchQueue.init(label: "ns_file_coordinator_util/r/\(session)")
+      let readHandler = ReadFileHandler(url: url, bufferSize: bufferSize, queue: streamQueue, debugDelay: debugDelay)
+      let eventChannel = FlutterEventChannel(name: "ns_file_coordinator_util/event/\(session)", binaryMessenger: self.binaryMessenger)
+      eventChannel.setStreamHandler(readHandler)
       
       DispatchQueue.global().async {
         var coordinatorErr: NSError? = nil
@@ -98,12 +102,9 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
             // Returns immediately and let dart side start listening stream.
             result(nil)
           }
-          let streamQueue = DispatchQueue.init(label: "ns_file_coordinator_util/r/\(session)")
-          let eventHandler = ReadFileHandler(url: url, bufferSize: bufferSize, queue: streamQueue, debugDelay: debugDelay)
-          let eventChannel = FlutterEventChannel(name: "ns_file_coordinator_util/event/\(session)", binaryMessenger: self.binaryMessenger)
-          eventChannel.setStreamHandler(eventHandler)
-          eventHandler.wait()
-          eventChannel.setStreamHandler(nil)
+          
+          // Block current queue until read handler is completed.
+          readHandler.wait()
         }
         // If err is not nil, the block in coordinator is not executed.
         if let coordinatorErr = coordinatorErr {
@@ -541,13 +542,17 @@ class ReadFileHandler: NSObject, FlutterStreamHandler {
             Thread.sleep(forTimeInterval: delay)
           }
           let data = Data(buf[..<amount])
-          self.eventSink?(data)
+          DispatchQueue.main.async {
+            self.eventSink?(data)
+          }
         }
         stream.close()
       }
       
-      self.eventSink?(FlutterEndOfEventStream)
-      self.semaphore.signal()
+      DispatchQueue.main.async {
+        self.eventSink?(FlutterEndOfEventStream)
+        self.semaphore.signal()
+      }
     }
     return nil
   }

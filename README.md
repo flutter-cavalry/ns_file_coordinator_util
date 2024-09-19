@@ -8,7 +8,7 @@ NOTE: this plugin doesn't automatically call `startAccessingSecurityScopedResour
 
 ```dart
   /// Reads an iCloud [srcUrl] file and return a [Uint8List].
-Future<Uint8List> readFile(String srcUrl);
+Future<Uint8List> readFileSync(String srcUrl);
 
 /// Reads an iCloud [srcUrl] file and returns a stream of [Uint8List].
 Future<Stream<Uint8List>> readFileStream(

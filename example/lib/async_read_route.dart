@@ -89,14 +89,14 @@ class _AsyncReadRouteState extends State<AsyncReadRoute> {
                                 if (task.cancelled) {
                                   task.doneMsg = 'Cancelled';
                                 } else {
-                                  final expected =
-                                      await _plugin.readFile(task.entity.url);
+                                  final expected = await _plugin
+                                      .readFileSync(task.entity.url);
                                   final actual = task.bytes!.takeBytes();
                                   if (!_listEquals(actual, expected)) {
                                     task.doneMsg = 'Error: Mismatch';
                                   } else {
                                     task.doneMsg =
-                                        'Async read: ${prettyBytes(actual.length.toDouble())}';
+                                        'Async read done: ${prettyBytes(actual.length.toDouble())}';
                                   }
                                 }
                                 task.working = false;
@@ -128,7 +128,8 @@ class _AsyncReadRouteState extends State<AsyncReadRoute> {
                     ),
                     OutlinedButton(
                         onPressed: () async {
-                          final bytes = await _plugin.readFile(task.entity.url);
+                          final bytes =
+                              await _plugin.readFileSync(task.entity.url);
                           setState(() {
                             task.doneMsg =
                                 'Sync read: ${prettyBytes(bytes.length.toDouble())}';

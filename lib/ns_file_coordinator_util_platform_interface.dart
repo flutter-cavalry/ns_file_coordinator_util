@@ -95,8 +95,8 @@ abstract class NsFileCoordinatorUtilPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<Uint8List> readFile(String srcUrl) {
-    throw UnimplementedError('readFile() has not been implemented.');
+  Future<Uint8List> readFileSync(String srcUrl) {
+    throw UnimplementedError('readFileSync() has not been implemented.');
   }
 
   Future<void> writeFile(String destUrl, Uint8List data) {

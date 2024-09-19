@@ -12,8 +12,8 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
   var _session = 0;
 
   @override
-  Future<Uint8List> readFile(String srcUrl) async {
-    final res = await methodChannel.invokeMethod<Uint8List>('readFile', {
+  Future<Uint8List> readFileSync(String srcUrl) async {
+    final res = await methodChannel.invokeMethod<Uint8List>('readFileSync', {
       'src': srcUrl.toString(),
     });
     if (res == null) {
