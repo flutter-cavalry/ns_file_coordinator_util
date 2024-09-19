@@ -111,8 +111,9 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
   }
 
   @override
-  Future<void> mkdir(String url) async {
-    await methodChannel.invokeMethod<void>('mkdir', {'url': url.toString()});
+  Future<void> mkdirp(String url, List<String> components) async {
+    await methodChannel.invokeMethod<void>(
+        'mkdirp', {'url': url.toString(), 'components': components});
   }
 
   @override

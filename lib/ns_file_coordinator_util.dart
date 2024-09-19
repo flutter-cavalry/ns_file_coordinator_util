@@ -68,8 +68,8 @@ class NsFileCoordinatorUtil {
   }
 
   /// Creates a directory [url] like [mkdir -p].
-  Future<void> mkdir(String url) async {
-    return NsFileCoordinatorUtilPlatform.instance.mkdir(url);
+  Future<void> mkdirp(String url, List<String> components) async {
+    return NsFileCoordinatorUtilPlatform.instance.mkdirp(url, components);
   }
 
   /// Checks if the directory [url] is empty.

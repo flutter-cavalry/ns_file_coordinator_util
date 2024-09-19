@@ -275,11 +275,13 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         self.reportResult(result: result, data: res)
       }
       
-    case "mkdir":
-      guard let url = URL(string: args["url"] as! String) else {
+    case "mkdirp":
+      guard let parentUrl = URL(string: args["url"] as! String) else {
         result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
         return
       }
+      let components = args["components"] as! [String]
+      let url = components.reduce(parentUrl) { $0.appendingPathComponent($1) }
       
       DispatchQueue.global().async {
         let res = self.coordinateFSWriting(url: url) { url in

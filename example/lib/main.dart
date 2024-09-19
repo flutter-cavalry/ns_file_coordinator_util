@@ -408,17 +408,15 @@ class _MyHomeState extends State<MyHome> {
   Future<void> _mkdir() async {
     try {
       var dir = _icloudFolder;
-      var fileRelPath = _fileTextController.text;
-      if (fileRelPath.isEmpty || dir == null) {
+      var dirName = _fileTextController.text;
+      if (dirName.isEmpty || dir == null) {
         return;
       }
-      var fileAbsUrl =
-          await _darwinUrlPlugin.append(dir, [fileRelPath], isDir: false);
 
       setState(() {
-        _output = 'Creating directory $fileAbsUrl';
+        _output = 'Creating directory $dirName';
       });
-      await _plugin.mkdir(fileAbsUrl);
+      await _plugin.mkdirp(dir, [dirName]);
       setState(() {
         _output = 'Created';
       });
