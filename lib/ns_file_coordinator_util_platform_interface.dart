@@ -137,7 +137,7 @@ abstract class NsFileCoordinatorUtilPlatform extends PlatformInterface {
     throw UnimplementedError('isDirectory() has not been implemented.');
   }
 
-  Future<void> mkdirp(String url, List<String> components) async {
+  Future<String> mkdirp(String url, List<String> components) async {
     throw UnimplementedError('mkdirp() has not been implemented.');
   }
 

@@ -287,7 +287,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         let res = self.coordinateFSWriting(url: url) { url in
           do {
             try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
-            return ResultWrapper.createResult(true)
+            return ResultWrapper.createResult(url.absoluteString)
           } catch {
             return ResultWrapper.createError(error)
           }

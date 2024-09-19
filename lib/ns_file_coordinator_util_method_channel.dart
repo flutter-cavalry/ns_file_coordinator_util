@@ -111,9 +111,13 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
   }
 
   @override
-  Future<void> mkdirp(String url, List<String> components) async {
-    await methodChannel.invokeMethod<void>(
+  Future<String> mkdirp(String url, List<String> components) async {
+    final newUrl = await methodChannel.invokeMethod<String>(
         'mkdirp', {'url': url.toString(), 'components': components});
+    if (newUrl == null) {
+      throw Exception('Unexpected null result for directory $url');
+    }
+    return newUrl;
   }
 
   @override

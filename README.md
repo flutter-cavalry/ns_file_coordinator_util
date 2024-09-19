@@ -43,7 +43,7 @@ Future<void> copyPath(String srcUrl, String destUrl);
 Future<bool?> isDirectory(String url);
 
 /// Creates a directory [url] like [mkdir -p].
-Future<void> mkdirp(String url, List<String> components);
+Future<String> mkdirp(String url, List<String> components);
 
 /// Checks if the directory [url] is empty.
 Future<bool> isEmptyDirectory(String url);
