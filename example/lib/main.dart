@@ -49,6 +49,7 @@ class _MyHomeState extends State<MyHome> {
   late TextEditingController _fileTextController;
   String _output = '';
   String? _icloudFolder;
+  bool _overwriteFlag = false;
 
   @override
   void initState() {
@@ -165,6 +166,16 @@ class _MyHomeState extends State<MyHome> {
       OutlinedButton(onPressed: _exists, child: const Text('Check existence')),
       _sep(),
       OutlinedButton(onPressed: _mkdir, child: const Text('Mkdir')),
+      _sep(),
+      CheckboxListTile(
+        title: const Text('Overwrite flag'),
+        value: _overwriteFlag,
+        onChanged: (value) {
+          setState(() {
+            _overwriteFlag = value!;
+          });
+        },
+      ),
       _sep(),
     ];
   }
@@ -362,9 +373,9 @@ class _MyHomeState extends State<MyHome> {
       var tmpDirUrl = await _darwinUrlPlugin.filePathToUrl(tmpDir);
 
       setState(() {
-        _output = 'Writing to $fileAbsUrl';
+        _output = 'Writing to $fileAbsUrl: overwrite=$_overwriteFlag';
       });
-      await _plugin.copyPath(tmpDirUrl, fileAbsUrl);
+      await _plugin.copyPath(tmpDirUrl, fileAbsUrl, overwrite: _overwriteFlag);
       setState(() {
         _output = 'Succeeded';
       });

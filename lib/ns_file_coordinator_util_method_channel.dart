@@ -102,7 +102,7 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
     await methodChannel.invokeMethod<void>('copyPath', {
       'src': srcUrl.toString(),
       'dest': destUrl.toString(),
-      'overwrite': overwrite,
+      'overwrite': overwrite ?? false,
     });
   }
 
