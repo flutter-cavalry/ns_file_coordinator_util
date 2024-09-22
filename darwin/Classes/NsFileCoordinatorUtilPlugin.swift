@@ -578,6 +578,8 @@ class WriteFileHandler: NSObject {
   let queue: DispatchQueue
   var endResult: FlutterResult?
   
+  private var firstWrite = true
+  
   private let semaphore = DispatchSemaphore(value: 0)
   
   init(url: URL, queue: DispatchQueue) {
@@ -595,6 +597,11 @@ class WriteFileHandler: NSObject {
     // Don't block the main thread, writing happens on a queue.
     queue.async {
       do {
+        if self.firstWrite {
+          // Clear the dest file on first write.
+          self.firstWrite = false
+          try Data().write(to: self.url)
+        }
         try data.append(fileURL: self.url)
         DispatchQueue.main.async {
           writeResult(nil)
