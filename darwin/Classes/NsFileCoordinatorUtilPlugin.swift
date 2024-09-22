@@ -246,12 +246,17 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
         return
       }
+      let overwrite = args["overwrite"] as? Bool ?? false
       
       DispatchQueue.global().async {
         let res = self.coordinateFSReadingAndWriting(src: srcURL, dest: destURL) { srcURL, destURL in
           do {
             try FileManager.default.createDirectory(at: destURL.deletingLastPathComponent(), withIntermediateDirectories: true)
-            try FileManager.default.copyItem(at: srcURL, to: destURL)
+            if overwrite && FileManager.default.fileExists(atPath: destURL.path) {
+              _ = try FileManager.default.replaceItemAt(destURL, withItemAt: srcURL)
+            } else {
+              try FileManager.default.copyItem(at: srcURL, to: destURL)
+            }
             return ResultWrapper.createResult(true)
           } catch {
             return ResultWrapper.createError(error)
