@@ -36,7 +36,7 @@ SPEC CHECKSUMS:
   darwin_url: a6439fcef7fdfdd19ac9f7aa4ffed427d98b1da3
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   ios_document_picker: d9bc7b50a43cfdb63aa6ee25ef21f0a8de50690c
-  ns_file_coordinator_util: 3577b3bb512fd6e66d94b978b6f64d6521deab3e
+  ns_file_coordinator_util: e69099aa889043383dd7a51790aeb5480774f263
 
 PODFILE CHECKSUM: 775997f741c536251164e3eacf6e34abf2eb7a17
 

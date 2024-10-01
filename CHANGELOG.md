@@ -1,3 +1,7 @@
+## 0.21.0
+
+- Add `start` and `count` params to `readFileSync`.
+
 ## 0.20.0
 
 - (**Breaking**) `readFile` now returns a `Uint8List`.
