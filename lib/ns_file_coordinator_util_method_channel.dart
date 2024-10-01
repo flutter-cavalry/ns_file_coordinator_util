@@ -12,9 +12,21 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
   var _session = 0;
 
   @override
-  Future<Uint8List> readFileSync(String srcUrl) async {
+  Future<Uint8List> readFileSync(String srcUrl,
+      {int? start, int? count}) async {
+    if (start != null && count == null) {
+      throw ArgumentError('count must be specified if start is specified');
+    }
+    if (count != null) {
+      if (count <= 0) {
+        throw ArgumentError('count must be greater than 0');
+      }
+      start ??= 0;
+    }
     final res = await methodChannel.invokeMethod<Uint8List>('readFileSync', {
       'src': srcUrl.toString(),
+      'start': start,
+      'count': count,
     });
     if (res == null) {
       throw Exception('Unexpected null result for file $srcUrl');

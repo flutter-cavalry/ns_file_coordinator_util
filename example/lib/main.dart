@@ -142,7 +142,11 @@ class _MyHomeState extends State<MyHome> {
       ),
       _sep(),
       OutlinedButton(
-          onPressed: _download, child: const Text('Read/download file')),
+          onPressed: _readSync, child: const Text('Read/download file')),
+      _sep(),
+      OutlinedButton(
+          onPressed: () => _readSync(partial: true),
+          child: const Text('Read file with offset')),
       _sep(),
       OutlinedButton(onPressed: _stat, child: const Text('Get information')),
       _sep(),
@@ -215,7 +219,7 @@ class _MyHomeState extends State<MyHome> {
     }
   }
 
-  Future<void> _download() async {
+  Future<void> _readSync({bool? partial}) async {
     try {
       var dir = _icloudFolder;
       var fileRelPath = _fileTextController.text;
@@ -228,7 +232,8 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Reading/downloading $dir';
       });
-      final data = await _plugin.readFileSync(fileAbsUrl);
+      final data = await _plugin.readFileSync(fileAbsUrl,
+          start: partial == true ? 3 : null, count: partial == true ? 2 : null);
       setState(() {
         _output = 'File content: ${data.length} bytes';
       });

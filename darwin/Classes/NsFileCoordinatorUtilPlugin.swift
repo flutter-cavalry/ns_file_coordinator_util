@@ -68,10 +68,15 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
         return
       }
+      let start = args["start"] as? Int
+      let count = args["count"] as? Int
       
       DispatchQueue.global().async {
         let res = self.coordinateFSReading(url: url) { url in
           do {
+            if let start = start, let count = count, url.isFileURL {
+              return ResultWrapper.createResult(try self.readFile(from: url, startIndex: UInt64(start), count: count))
+            }
             let data = try Data(contentsOf: url)
             return ResultWrapper.createResult(data)
           } catch {
@@ -510,6 +515,15 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
       stat["relativePath"] = url.relativePath
     }
     return stat
+  }
+  
+  private func readFile(from fileURL: URL, startIndex: UInt64, count: Int) throws -> Data? {
+      let fileHandle = try FileHandle(forReadingFrom: fileURL)
+      try fileHandle.seek(toOffset: startIndex)
+      let data = try fileHandle.read(upToCount: count)
+      try fileHandle.close()
+
+      return data
   }
 }
 

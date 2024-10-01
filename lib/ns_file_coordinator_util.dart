@@ -4,8 +4,11 @@ import 'ns_file_coordinator_util_platform_interface.dart';
 
 class NsFileCoordinatorUtil {
   /// Reads an iCloud [srcUrl] file and return a [Uint8List].
-  Future<Uint8List> readFileSync(String srcUrl) {
-    return NsFileCoordinatorUtilPlatform.instance.readFileSync(srcUrl);
+  ///
+  /// [start] and [count] are optional parameters to read only a part of the file.
+  Future<Uint8List> readFileSync(String srcUrl, {int? start, int? count}) {
+    return NsFileCoordinatorUtilPlatform.instance
+        .readFileSync(srcUrl, start: start, count: count);
   }
 
   /// Writes the specified [data] to the iCloud [destUrl] file.

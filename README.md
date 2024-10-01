@@ -7,8 +7,10 @@ Helper functions for `NSFileCoordinator` (iOS/macOS only).
 NOTE: this plugin doesn't automatically call `startAccessingSecurityScopedResource`. You can call it yourself with [accessing_security_scoped_resource](https://pub.dev/packages/accessing_security_scoped_resource);
 
 ```dart
-  /// Reads an iCloud [srcUrl] file and return a [Uint8List].
-Future<Uint8List> readFileSync(String srcUrl);
+/// Reads an iCloud [srcUrl] file and return a [Uint8List].
+///
+/// [start] and [count] are optional parameters to read only a part of the file.
+Future<Uint8List> readFileSync(String srcUrl, {int? start, int? count});
 
 /// Reads an iCloud [srcUrl] file and returns a stream of [Uint8List].
 Future<Stream<Uint8List>> readFileStream(
