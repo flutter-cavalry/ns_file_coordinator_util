@@ -15,7 +15,7 @@ Future<Uint8List> readFileSync(String srcUrl, {int? start, int? count});
 /// Reads an iCloud [srcUrl] file and returns a stream of [Uint8List].
 Future<Stream<Uint8List>> readFileStream(
     String srcUrl,
-    {int? bufferSize, double? debugDelay});
+    {int? bufferSize, double? debugDelay, int? start});
 
 /// Returns information about the given [url].
 Future<NsFileCoordinatorEntity?> stat(String url);

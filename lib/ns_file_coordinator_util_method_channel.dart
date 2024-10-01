@@ -44,13 +44,14 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
 
   @override
   Future<Stream<Uint8List>> readFileStream(String srcUrl,
-      {int? bufferSize, double? debugDelay}) async {
+      {int? bufferSize, double? debugDelay, int? start}) async {
     var session = _nextSession();
     await methodChannel.invokeMethod<dynamic>('readFileStream', {
       'src': srcUrl.toString(),
       'bufferSize': bufferSize,
       'session': session,
       'debugDelay': debugDelay,
+      'start': start,
     });
     var stream = EventChannel('ns_file_coordinator_util/event/$session')
         .receiveBroadcastStream();

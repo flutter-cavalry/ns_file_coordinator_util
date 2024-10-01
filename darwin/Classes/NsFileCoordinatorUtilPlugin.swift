@@ -75,7 +75,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
         let res = self.coordinateFSReading(url: url) { url in
           do {
             if let start = start, let count = count, url.isFileURL {
-              return ResultWrapper.createResult(try self.readFile(from: url, startIndex: UInt64(start), count: count))
+              return ResultWrapper.createResult(try self.readFileSyncWithOffset(from: url, startIndex: UInt64(start), count: count))
             }
             let data = try Data(contentsOf: url)
             return ResultWrapper.createResult(data)
@@ -95,8 +95,10 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
       }
       let bufferSize = args["bufferSize"] as? Int ?? 4 * 1024 * 1024
       let debugDelay = args["debugDelay"] as? Double
+      let start = args["start"] as? Int
+      
       let streamQueue = DispatchQueue.init(label: "ns_file_coordinator_util/r/\(session)")
-      let readHandler = ReadFileHandler(url: url, bufferSize: bufferSize, queue: streamQueue, debugDelay: debugDelay)
+      let readHandler = ReadFileHandler(url: url, bufferSize: bufferSize, queue: streamQueue, debugDelay: debugDelay, start: start)
       let eventChannel = FlutterEventChannel(name: "ns_file_coordinator_util/event/\(session)", binaryMessenger: self.binaryMessenger)
       eventChannel.setStreamHandler(readHandler)
       
@@ -517,13 +519,13 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     return stat
   }
   
-  private func readFile(from fileURL: URL, startIndex: UInt64, count: Int) throws -> Data? {
-      let fileHandle = try FileHandle(forReadingFrom: fileURL)
-      try fileHandle.seek(toOffset: startIndex)
-      let data = try fileHandle.read(upToCount: count)
-      try fileHandle.close()
-
-      return data
+  private func readFileSyncWithOffset(from fileURL: URL, startIndex: UInt64, count: Int) throws -> Data? {
+    let fileHandle = try FileHandle(forReadingFrom: fileURL)
+    try fileHandle.seek(toOffset: startIndex)
+    let data = try fileHandle.read(upToCount: count)
+    try fileHandle.close()
+    
+    return data
   }
 }
 
@@ -532,15 +534,18 @@ class ReadFileHandler: NSObject, FlutterStreamHandler {
   let bufferSize: Int
   let queue: DispatchQueue
   let debugDelay: Double?
+  let start: Int?
+  
   private let semaphore = DispatchSemaphore(value: 0)
   private var eventSink: FlutterEventSink?
   private var isCancelled = false
   
-  init(url: URL, bufferSize: Int, queue: DispatchQueue, debugDelay: Double?) {
+  init(url: URL, bufferSize: Int, queue: DispatchQueue, debugDelay: Double?, start: Int?) {
     self.url = url
     self.bufferSize = bufferSize
     self.queue = queue
     self.debugDelay = debugDelay
+    self.start = start
   }
   
   // This is called from plugin thread.
@@ -554,27 +559,54 @@ class ReadFileHandler: NSObject, FlutterStreamHandler {
     self.eventSink = events
     // Don't block the main thread, reading happens on a queue.
     queue.async {
-      if let stream = InputStream(url: self.url) {
-        var buf = [UInt8](repeating: 0, count: self.bufferSize)
-        stream.open()
-        
-        while case let amount = stream.read(&buf, maxLength: self.bufferSize), amount > 0, !self.isCancelled {
-          if let delay = self.debugDelay {
-            Thread.sleep(forTimeInterval: delay)
+      do {
+        if self.url.isFileURL {
+          let fileHandle = try FileHandle(forReadingFrom: self.url)
+          if let start = self.start {
+            try fileHandle.seek(toOffset: UInt64(start))
           }
-          let data = Data(buf[..<amount])
-          DispatchQueue.main.async {
-            self.eventSink?(data)
+          while true {
+            if let delay = self.debugDelay {
+              Thread.sleep(forTimeInterval: delay)
+            }
+            let data = try fileHandle.read(upToCount: self.bufferSize)
+            guard let buffer = data, !buffer.isEmpty else {
+              break
+            }
+            DispatchQueue.main.async {
+              self.eventSink?(data)
+            }
+          }
+          try fileHandle.close()
+        } else {
+          if let stream = InputStream(url: self.url) {
+            var buf = [UInt8](repeating: 0, count: self.bufferSize)
+            stream.open()
+            
+            while case let amount = stream.read(&buf, maxLength: self.bufferSize), amount > 0, !self.isCancelled {
+              if let delay = self.debugDelay {
+                Thread.sleep(forTimeInterval: delay)
+              }
+              let data = Data(buf[..<amount])
+              DispatchQueue.main.async {
+                self.eventSink?(data)
+              }
+            }
+            stream.close()
           }
         }
-        stream.close()
+        
+        DispatchQueue.main.async {
+          self.eventSink?(FlutterEndOfEventStream)
+          self.semaphore.signal()
+        }
+      } catch {
+        DispatchQueue.main.async {
+          self.eventSink?(FlutterError(code: "PluginError", message: error.localizedDescription, details: nil))
+          self.semaphore.signal()
+        }
       }
-      
-      DispatchQueue.main.async {
-        self.eventSink?(FlutterEndOfEventStream)
-        self.semaphore.signal()
-      }
-    }
+    } // end of queue.async
     return nil
   }
   
