@@ -1,5 +1,5 @@
 name: ns_file_coordinator_util
-description: Helper functions for `NSFileCoordinator` (iOS/macOS only).
+description: A Flutter plugin to call iOS/macOS `NSFileCoordinator` APIs.
 version: 0.22.0
 homepage: https://github.com/flutter-cavalry/ns_file_coordinator_util
 

@@ -1,6 +1,8 @@
+# ns_file_coordinator_util
+
 [![pub package](https://img.shields.io/pub/v/ns_file_coordinator_util.svg)](https://pub.dev/packages/ns_file_coordinator_util)
 
-Helper functions for `NSFileCoordinator` (iOS/macOS only).
+A Flutter plugin to call iOS/macOS `NSFileCoordinator` APIs.
 
 ## Usage
 
