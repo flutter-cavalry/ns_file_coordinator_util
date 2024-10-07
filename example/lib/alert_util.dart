@@ -1,8 +1,8 @@
-import 'package:fc_material_alert/fc_material_alert.dart';
+import 'package:fc_quick_dialog/fc_quick_dialog.dart';
 import 'package:flutter/material.dart';
 
 Future<void> showWarningAlert(BuildContext context, String msg) async {
-  await FcMaterialAlert.standard(
+  await FcQuickDialog.info(
     context,
     content: msg,
     title: 'Warning',
@@ -11,16 +11,16 @@ Future<void> showWarningAlert(BuildContext context, String msg) async {
 }
 
 Future<void> showErrorAlert(BuildContext context, Object err) async {
-  await FcMaterialAlert.error(
+  await FcQuickDialog.error(
     context,
-    err,
+    error: err,
     title: 'Error',
     okText: 'OK',
   );
 }
 
 Future<void> showInfoAlert(BuildContext context, String msg) async {
-  await FcMaterialAlert.standard(
+  await FcQuickDialog.info(
     context,
     content: msg,
     title: 'Info',

@@ -1,6 +1,6 @@
 name: ns_file_coordinator_util
 description: A Flutter plugin to call iOS/macOS `NSFileCoordinator` APIs.
-version: 0.22.0
+version: 0.22.1
 homepage: https://github.com/flutter-cavalry/ns_file_coordinator_util
 
 environment:
