@@ -58,7 +58,9 @@ class NsFileCoordinatorUtil {
     return NsFileCoordinatorUtilPlatform.instance.move(srcUrl, destUrl);
   }
 
-  /// Copies [srcUrl] url to iCloud [dest].
+  /// Copies [srcUrl] url to iCloud [destUrl].
+  ///
+  /// [overwrite] whether to overwrite the destination file if it already exists.
   Future<void> copyPath(String srcUrl, String destUrl, {bool? overwrite}) {
     return NsFileCoordinatorUtilPlatform.instance
         .copyPath(srcUrl, destUrl, overwrite: overwrite);
@@ -71,7 +73,7 @@ class NsFileCoordinatorUtil {
     return NsFileCoordinatorUtilPlatform.instance.isDirectory(url);
   }
 
-  /// Creates a directory [url] like [mkdir -p].
+  /// Creates a directory [url] like `mkdir -p`.
   Future<String> mkdirp(String url, List<String> components) async {
     return NsFileCoordinatorUtilPlatform.instance.mkdirp(url, components);
   }
