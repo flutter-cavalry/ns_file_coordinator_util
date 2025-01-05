@@ -1,3 +1,7 @@
+## 0.22.0
+
+- Add Swift Package Manager support.
+
 ## 0.21.0
 
 - Add `start` and `count` params to `readFileSync`.

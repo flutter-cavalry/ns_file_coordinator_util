@@ -45,118 +45,112 @@ class _AsyncReadRouteState extends State<AsyncReadRoute> {
 
   @override
   Widget build(BuildContext context) {
-    final body = Padding(
-        padding: const EdgeInsets.all(8),
-        child: ListView.builder(
-          itemCount: _tasks.length,
-          itemBuilder: (context, index) {
-            final task = _tasks[index];
-            Widget content;
-            if (task.working) {
-              content = Text(
-                  '🟢 ${prettyBytes(task.bytes!.length.toDouble())} / ${prettyBytes(task.entity.length.toDouble())}');
-            } else {
-              content = Text(task.doneMsg ?? '');
-            }
-            Widget w = Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    final body = ListView.builder(
+      itemCount: _tasks.length,
+      itemBuilder: (context, index) {
+        final task = _tasks[index];
+        Widget? content;
+        if (task.working) {
+          content = Text(
+              '🟢 ${prettyBytes(task.bytes!.length.toDouble())} / ${prettyBytes(task.entity.length.toDouble())}');
+        } else if (task.doneMsg != null) {
+          content = Text(task.doneMsg!);
+        }
+        Widget w = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 8,
+          children: [
+            Text(
+                '${prettyBytes(task.entity.length.toDouble())} | ${task.entity.name}'),
+            Row(
+              spacing: 2,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                        child: Text(
-                            '${prettyBytes(task.entity.length.toDouble())} | ${task.entity.name}')),
-                    OutlinedButton(
-                      onPressed: task.working
-                          ? null
-                          : () async {
-                              try {
-                                task.bytes = BytesBuilder();
-                                setState(() {
-                                  task.working = true;
-                                });
-                                final stream = await _plugin.readFileStream(
-                                    task.entity.url,
-                                    bufferSize: 1024 * 300,
-                                    debugDelay: 0.5);
-                                await for (final bytes in stream) {
-                                  if (task.cancelled) {
-                                    break;
-                                  }
-                                  task.bytes!.add(bytes);
-                                  setState(() {});
-                                }
-                                if (task.cancelled) {
-                                  task.doneMsg = 'Cancelled';
-                                } else {
-                                  final expected = await _plugin
-                                      .readFileSync(task.entity.url);
-                                  final actual = task.bytes!.takeBytes();
-                                  if (!_listEquals(actual, expected)) {
-                                    task.doneMsg = 'Error: Mismatch';
-                                  } else {
-                                    task.doneMsg =
-                                        'Async read done: ${prettyBytes(actual.length.toDouble())}';
-                                  }
-                                }
-                                task.working = false;
-                                task.cancelled = false;
-                                setState(() {});
-                              } catch (e) {
-                                task.working = false;
-                                task.cancelled = false;
-                                task.doneMsg = 'Error: $e';
-                                setState(() {});
+                TextButton(
+                  onPressed: task.working
+                      ? null
+                      : () async {
+                          try {
+                            task.bytes = BytesBuilder();
+                            setState(() {
+                              task.working = true;
+                            });
+                            final stream = await _plugin.readFileStream(
+                                task.entity.url,
+                                bufferSize: 1024 * 300,
+                                debugDelay: 0.5);
+                            await for (final bytes in stream) {
+                              if (task.cancelled) {
+                                break;
                               }
-                            },
-                      child: const Text('Async read'),
-                    ),
-                    const SizedBox(
-                      width: 8,
-                    ),
-                    OutlinedButton(
-                        onPressed: !task.working || task.cancelled
-                            ? null
-                            : () {
-                                setState(() {
-                                  task.cancelled = true;
-                                });
-                              },
-                        child: Text(task.cancelled ? 'Cancelling' : 'Cancel')),
-                    const SizedBox(
-                      width: 8,
-                    ),
-                    OutlinedButton(
-                        onPressed: () async {
-                          final bytes =
-                              await _plugin.readFileSync(task.entity.url);
-                          setState(() {
-                            task.doneMsg =
-                                'Sync read: ${prettyBytes(bytes.length.toDouble())}';
-                          });
+                              task.bytes!.add(bytes);
+                              setState(() {});
+                            }
+                            if (task.cancelled) {
+                              task.doneMsg = 'Cancelled';
+                            } else {
+                              final expected =
+                                  await _plugin.readFileSync(task.entity.url);
+                              final actual = task.bytes!.takeBytes();
+                              if (!_listEquals(actual, expected)) {
+                                task.doneMsg = 'Error: Mismatch';
+                              } else {
+                                task.doneMsg =
+                                    'Async read done: ${prettyBytes(actual.length.toDouble())}';
+                              }
+                            }
+                            task.working = false;
+                            task.cancelled = false;
+                            setState(() {});
+                          } catch (e) {
+                            task.working = false;
+                            task.cancelled = false;
+                            task.doneMsg = 'Error: $e';
+                            setState(() {});
+                          }
                         },
-                        child: const Text('Sync read')),
-                  ],
+                  child: const Text('Async read'),
                 ),
-                content,
+                TextButton(
+                    onPressed: !task.working || task.cancelled
+                        ? null
+                        : () {
+                            setState(() {
+                              task.cancelled = true;
+                            });
+                          },
+                    child: Text(task.cancelled ? 'Cancelling' : 'Cancel')),
+                TextButton(
+                    onPressed: () async {
+                      final bytes = await _plugin.readFileSync(task.entity.url);
+                      setState(() {
+                        task.doneMsg =
+                            'Sync read: ${prettyBytes(bytes.length.toDouble())}';
+                      });
+                    },
+                    child: const Text('Sync read')),
               ],
-            );
-            w = Padding(padding: const EdgeInsets.all(8), child: w);
-            return w;
-          },
-        ));
+            ),
+            if (content != null) content,
+            Divider(),
+          ],
+        );
+        return w;
+      },
+    );
     return Scaffold(
       appBar: AppBar(
         title: const Text('Plugin example app'),
       ),
-      body: Column(
-        children: [
-          const Text(
-              'NOTE: All read operations have a 0.5s delay for debugging.',
-              style: TextStyle(color: Colors.red)),
-          Expanded(child: body),
-        ],
-      ),
+      body: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            children: [
+              const Text(
+                  'NOTE: All read operations have a 0.5s delay for debugging.',
+                  style: TextStyle(color: Colors.red)),
+              Expanded(child: body),
+            ],
+          )),
     );
   }
 }

@@ -8,16 +8,12 @@ PODS:
   - Flutter (1.0.0)
   - ios_document_picker (0.0.1):
     - Flutter
-  - ns_file_coordinator_util (0.0.1):
-    - Flutter
-    - FlutterMacOS
 
 DEPENDENCIES:
   - accessing_security_scoped_resource (from `.symlinks/plugins/accessing_security_scoped_resource/darwin`)
   - darwin_url (from `.symlinks/plugins/darwin_url/darwin`)
   - Flutter (from `Flutter`)
   - ios_document_picker (from `.symlinks/plugins/ios_document_picker/ios`)
-  - ns_file_coordinator_util (from `.symlinks/plugins/ns_file_coordinator_util/darwin`)
 
 EXTERNAL SOURCES:
   accessing_security_scoped_resource:
@@ -28,16 +24,13 @@ EXTERNAL SOURCES:
     :path: Flutter
   ios_document_picker:
     :path: ".symlinks/plugins/ios_document_picker/ios"
-  ns_file_coordinator_util:
-    :path: ".symlinks/plugins/ns_file_coordinator_util/darwin"
 
 SPEC CHECKSUMS:
   accessing_security_scoped_resource: 5328c9963fc8873d1b60650ff42101847d3ff0ea
   darwin_url: a6439fcef7fdfdd19ac9f7aa4ffed427d98b1da3
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   ios_document_picker: d9bc7b50a43cfdb63aa6ee25ef21f0a8de50690c
-  ns_file_coordinator_util: e69099aa889043383dd7a51790aeb5480774f263
 
-PODFILE CHECKSUM: 775997f741c536251164e3eacf6e34abf2eb7a17
+PODFILE CHECKSUM: 1b50a4280f44a231b37f858aebc2a001225decec
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2

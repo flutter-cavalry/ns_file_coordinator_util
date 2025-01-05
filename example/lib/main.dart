@@ -77,40 +77,38 @@ class _MyHomeState extends State<MyHome> {
           child: Container(
             padding: const EdgeInsets.all(20),
             child: Column(
+              spacing: 8,
               children: [
                 const Text('Click the + to select an iCloud folder first'),
-                _sep(),
-                OutlinedButton(
-                    onPressed: () async {
-                      if (_icloudFolder == null) {
-                        return;
-                      }
-                      await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  AsyncReadRoute(dirUrl: _icloudFolder!)));
-                    },
-                    child: const Text('Read file async tests')),
-                _sep(),
-                OutlinedButton(
-                    onPressed: () async {
-                      if (_icloudFolder == null) {
-                        return;
-                      }
-                      await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  AsyncWriteRoute(dirUrl: _icloudFolder!)));
-                    },
-                    child: const Text('Write file async tests')),
-                _sep(),
+                if (_icloudFolder != null)
+                  OutlinedButton(
+                      onPressed: () async {
+                        if (_icloudFolder == null) {
+                          return;
+                        }
+                        await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    AsyncReadRoute(dirUrl: _icloudFolder!)));
+                      },
+                      child: const Text('Read file async tests')),
+                if (_icloudFolder != null)
+                  OutlinedButton(
+                      onPressed: () async {
+                        if (_icloudFolder == null) {
+                          return;
+                        }
+                        await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    AsyncWriteRoute(dirUrl: _icloudFolder!)));
+                      },
+                      child: const Text('Write file async tests')),
                 if (_icloudFolder != null)
                   Text('iCloud folder: $_icloudFolder'),
-                _sep(),
-                ..._renderButtons(),
-                _sep(),
+                if (_icloudFolder != null) ..._renderButtons(),
                 Text(_output)
               ],
             ),
@@ -125,12 +123,6 @@ class _MyHomeState extends State<MyHome> {
     );
   }
 
-  Widget _sep() {
-    return const SizedBox(
-      height: 10,
-    );
-  }
-
   List<Widget> _renderButtons() {
     if (_icloudFolder == null) {
       return [];
@@ -140,37 +132,25 @@ class _MyHomeState extends State<MyHome> {
       TextField(
         controller: _fileTextController,
       ),
-      _sep(),
       OutlinedButton(
           onPressed: _readSync, child: const Text('Read/download file')),
-      _sep(),
       OutlinedButton(
           onPressed: () => _readSync(partial: true),
           child: const Text('Read file with offset')),
-      _sep(),
       OutlinedButton(onPressed: _stat, child: const Text('Get information')),
-      _sep(),
       OutlinedButton(
           onPressed: () => _list(recursive: false),
           child: const Text('List contents')),
-      _sep(),
       OutlinedButton(
           onPressed: () => _list(recursive: true),
           child: const Text('List contents recursively')),
-      _sep(),
       OutlinedButton(
           onPressed: () => _listFiles(), child: const Text('List files')),
-      _sep(),
       OutlinedButton(onPressed: _delete, child: const Text('Delete')),
-      _sep(),
       OutlinedButton(onPressed: _move, child: const Text('Move')),
-      _sep(),
       OutlinedButton(onPressed: _copyPath, child: const Text('Copy path')),
-      _sep(),
       OutlinedButton(onPressed: _exists, child: const Text('Check existence')),
-      _sep(),
       OutlinedButton(onPressed: _mkdir, child: const Text('Mkdir')),
-      _sep(),
       CheckboxListTile(
         title: const Text('Overwrite flag'),
         value: _overwriteFlag,
@@ -180,7 +160,6 @@ class _MyHomeState extends State<MyHome> {
           });
         },
       ),
-      _sep(),
     ];
   }
 
