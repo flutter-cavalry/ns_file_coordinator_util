@@ -1,6 +1,10 @@
-## 0.22.0
+## 0.23.0
 
 - Add Swift Package Manager support.
+
+## 0.22.0
+
+- Add `start` param to `readFileStream`.
 
 ## 0.21.0
 
