@@ -21,8 +21,6 @@ A new Flutter plugin project.
   s.osx.dependency 'FlutterMacOS'
   s.ios.deployment_target = '14.0'
   s.osx.deployment_target = '11.0'
-  s.ios.platform = :ios, '14.0'
-  s.osx.platform = :osx, '11.0'
 
   s.ios.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
   s.osx.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
