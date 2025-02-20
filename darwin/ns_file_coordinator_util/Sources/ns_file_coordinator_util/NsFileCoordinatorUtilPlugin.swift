@@ -449,12 +449,12 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     }
   }
 
-  private func handleResultWrapperError<T>(_ res: ResultWrapper<T>?, coordinatorErr: NSError?)
+  private func handleResultWrapperError<T>(_ res: ResultWrapper<T>?, coordinatorErr: NSError?, context: String)
     -> ResultWrapper<T>
   {
     guard let res = res else {
       return ResultWrapper<T>.createError(
-        CustomError(errorMessage: "Unexpected nil res in coordinateFSDeleting"))
+        CustomError(errorMessage: "Unexpected nil result in \(context)"))
     }
     if res.error != nil {
       return res
@@ -474,7 +474,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     ) { (url) in
       res = cb(url)
     }
-    return handleResultWrapperError(res, coordinatorErr: coordinatorErr)
+    return handleResultWrapperError(res, coordinatorErr: coordinatorErr, context: "FSDelete")
   }
 
   private func coordinateFSWriting<T>(url: URL, cb: (URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
@@ -483,7 +483,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     NSFileCoordinator().coordinate(writingItemAt: url, error: &coordinatorErr) { (url) in
       res = cb(url)
     }
-    return handleResultWrapperError(res, coordinatorErr: coordinatorErr)
+    return handleResultWrapperError(res, coordinatorErr: coordinatorErr, context: "FSWrite")
   }
 
   private func coordinateFSReading<T>(url: URL, cb: (URL) -> ResultWrapper<T>) -> ResultWrapper<T> {
@@ -492,7 +492,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     NSFileCoordinator().coordinate(readingItemAt: url, error: &coordinatorErr) { (url) in
       res = cb(url)
     }
-    return handleResultWrapperError(res, coordinatorErr: coordinatorErr)
+    return handleResultWrapperError(res, coordinatorErr: coordinatorErr, context: "FSRead")
   }
 
   private func coordinateFSReadingAndWriting<T>(
@@ -504,7 +504,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     { (src, dest) in
       res = cb(src, dest)
     }
-    return handleResultWrapperError(res, coordinatorErr: coordinatorErr)
+    return handleResultWrapperError(res, coordinatorErr: coordinatorErr, context: "FSReadAndWrite")
   }
 
   private func coordinateFSMoving<T>(src: URL, dest: URL, cb: (URL, URL) -> ResultWrapper<T>)
@@ -518,7 +518,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     ) { (src, dest) in
       res = cb(src, dest)
     }
-    return handleResultWrapperError(res, coordinatorErr: coordinatorErr)
+    return handleResultWrapperError(res, coordinatorErr: coordinatorErr, context: "FSMove")
   }
 
   private func fsStat(url: URL, relativePath: Bool) throws -> [String: Any?] {
