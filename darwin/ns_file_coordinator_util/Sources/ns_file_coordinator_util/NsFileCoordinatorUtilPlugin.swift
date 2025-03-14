@@ -138,7 +138,13 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
       DispatchQueue.global().async {
         let res = self.coordinateFSReading(url: url) { url in
           do {
-            let statMap = try self.fsStat(url: url, relativePath: false)
+            var statMap: [String: Any?]?
+            let ok = FileManager.default.fileExists(atPath: url.path)
+            if !ok {
+              statMap = nil
+            } else {
+              statMap = try self.fsStat(url: url, relativePath: false)
+            }
             return ResultWrapper.createResult(statMap)
           } catch {
             return ResultWrapper.createError(error)
