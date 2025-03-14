@@ -1,3 +1,7 @@
+## 0.24.0
+
+- Stop swallowing exceptions in `stat`.
+
 ## 0.23.0
 
 - Add Swift Package Manager support.
