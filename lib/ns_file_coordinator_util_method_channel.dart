@@ -14,9 +14,6 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
   @override
   Future<Uint8List> readFileSync(String srcUrl,
       {int? start, int? count}) async {
-    if (start != null && count == null) {
-      throw ArgumentError('count must be specified if start is specified');
-    }
     if (count != null) {
       if (count <= 0) {
         throw ArgumentError('count must be greater than 0');
