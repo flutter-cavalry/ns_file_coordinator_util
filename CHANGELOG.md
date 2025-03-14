@@ -1,3 +1,7 @@
+## 0.24.2
+
+- `readFileSync` now supports optional `start` and `count` parameters.
+
 ## 0.24.0
 
 - Stop swallowing exceptions in `stat`.
