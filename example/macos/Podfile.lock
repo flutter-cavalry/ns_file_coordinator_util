@@ -1,35 +1,15 @@
 PODS:
-  - accessing_security_scoped_resource (0.0.1):
-    - Flutter
-    - FlutterMacOS
-  - darwin_url (0.0.1):
-    - Flutter
-    - FlutterMacOS
   - FlutterMacOS (1.0.0)
-  - macos_file_picker (0.0.1):
-    - FlutterMacOS
 
 DEPENDENCIES:
-  - accessing_security_scoped_resource (from `Flutter/ephemeral/.symlinks/plugins/accessing_security_scoped_resource/darwin`)
-  - darwin_url (from `Flutter/ephemeral/.symlinks/plugins/darwin_url/darwin`)
   - FlutterMacOS (from `Flutter/ephemeral`)
-  - macos_file_picker (from `Flutter/ephemeral/.symlinks/plugins/macos_file_picker/macos`)
 
 EXTERNAL SOURCES:
-  accessing_security_scoped_resource:
-    :path: Flutter/ephemeral/.symlinks/plugins/accessing_security_scoped_resource/darwin
-  darwin_url:
-    :path: Flutter/ephemeral/.symlinks/plugins/darwin_url/darwin
   FlutterMacOS:
     :path: Flutter/ephemeral
-  macos_file_picker:
-    :path: Flutter/ephemeral/.symlinks/plugins/macos_file_picker/macos
 
 SPEC CHECKSUMS:
-  accessing_security_scoped_resource: 5328c9963fc8873d1b60650ff42101847d3ff0ea
-  darwin_url: a6439fcef7fdfdd19ac9f7aa4ffed427d98b1da3
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
-  macos_file_picker: 9ae907f5f69a352afc8fb44e8a80bb180f9267d5
 
 PODFILE CHECKSUM: c2e95c8c0fe03c5c57e438583cae4cc732296009
 

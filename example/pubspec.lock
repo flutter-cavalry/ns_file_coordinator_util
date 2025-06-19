@@ -5,10 +5,10 @@ packages:
     dependency: "direct main"
     description:
       name: accessing_security_scoped_resource
-      sha256: ca9697ebd4028d3b400891af7a5174933b28494d16bdb5f8b2ddccb22a949273
+      sha256: afb84f50ecca60dda51b93a4d92e9e22776d897b29f280374448ae8877160e75
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.0"
+    version: "3.4.0"
   async:
     dependency: transitive
     description:
@@ -69,10 +69,10 @@ packages:
     dependency: "direct main"
     description:
       name: darwin_url
-      sha256: f9a335186fcbd5c5b8e2a55f24a513d2dedf3ae31550cf51d22187186530c122
+      sha256: "6f2b3d60c3af85de99bde362d2a3efdb79e3419c20a0c821e938f7dd9eeb4de6"
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.0"
+    version: "0.6.1"
   fake_async:
     dependency: transitive
     description:
@@ -85,10 +85,10 @@ packages:
     dependency: "direct main"
     description:
       name: fc_quick_dialog
-      sha256: "9ffb682acf7534c67e74a9fa1c20227bc7b059415f11267aa8d66f9db12ab706"
+      sha256: "9b57bbfcdc17bc40a0f225a6219d2613a67cb64924e2111bdb78a7c0a653e9c7"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.3"
+    version: "0.1.0"
   fixnum:
     dependency: transitive
     description:
@@ -106,10 +106,10 @@ packages:
     dependency: "direct dev"
     description:
       name: flutter_lints
-      sha256: "5398f14efa795ffb7a33e9b6a08798b26a180edac4ad7db3f231e40f82ce11e1"
+      sha256: "3105dc8492f6183fb076ccf1f351ac3d60564bff92e20bfc4af9cc1651f4e7e1"
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.0"
+    version: "6.0.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -127,10 +127,10 @@ packages:
     dependency: "direct main"
     description:
       name: ios_document_picker
-      sha256: "8dd18eccf7543267bdcd0cf5291778a3a4961af339552f8c25f61874cb2fa828"
+      sha256: d7cbc61366602f6fd74a5bfeeecf68ad553ef91a6b1bb6d406dd7808d694d5c4
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1"
+    version: "0.4.0"
   leak_tracker:
     dependency: transitive
     description:
@@ -159,18 +159,18 @@ packages:
     dependency: transitive
     description:
       name: lints
-      sha256: c35bb79562d980e9a453fc715854e1ed39e24e7d0297a880ef54e17f9874a9d7
+      sha256: a5e2b223cb7c9c8efdc663ef484fdd95bb243bff242ef5b13e26883547fce9a0
       url: "https://pub.dev"
     source: hosted
-    version: "5.1.1"
+    version: "6.0.0"
   macos_file_picker:
     dependency: "direct main"
     description:
       name: macos_file_picker
-      sha256: fa310bbac0ec6ac6918777488e7621b3aec674a268ff593b7354d7bd5d9304e8
+      sha256: "8999b125f8166b60f4693065ddec7770bfc5b5fe3e4e6cecd78b07a3b33e7701"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.1"
+    version: "0.6.1"
   matcher:
     dependency: transitive
     description:
@@ -201,7 +201,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.24.2"
+    version: "0.25.0"
   path:
     dependency: "direct main"
     description:
@@ -328,5 +328,5 @@ packages:
     source: hosted
     version: "15.0.0"
 sdks:
-  dart: ">=3.7.0-0 <4.0.0"
+  dart: ">=3.8.0 <4.0.0"
   flutter: ">=3.18.0-18.0.pre.54"

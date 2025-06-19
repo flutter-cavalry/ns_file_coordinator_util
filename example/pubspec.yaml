@@ -29,13 +29,13 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   tmp_path: ^1.0.2
-  accessing_security_scoped_resource: ^2.0.0
-  macos_file_picker: ^0.3.0
+  accessing_security_scoped_resource: ^3.4.0
+  macos_file_picker: ^0.6.1
   path: ^1.8.2
-  ios_document_picker: ^0.0.1
-  darwin_url: ^0.4.0
+  ios_document_picker: ^0.4.0
+  darwin_url: ^0.6.1
   pretty_bytes: ^6.2.0
-  fc_quick_dialog: ^0.0.3
+  fc_quick_dialog: ^0.1.0
 
 dev_dependencies:
   flutter_test:
@@ -46,7 +46,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

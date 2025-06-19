@@ -7,9 +7,8 @@ import 'package:accessing_security_scoped_resource/accessing_security_scoped_res
 import 'package:darwin_url/darwin_url.dart';
 import 'package:flutter/material.dart';
 import 'package:ios_document_picker/ios_document_picker.dart';
-import 'package:ios_document_picker/ios_document_picker_platform_interface.dart';
+import 'package:ios_document_picker/types.dart';
 import 'package:macos_file_picker/macos_file_picker.dart';
-import 'package:macos_file_picker/macos_file_picker_platform_interface.dart';
 import 'package:ns_file_coordinator_util/ns_file_coordinator_util.dart';
 import 'package:ns_file_coordinator_util_example/async_read_route.dart';
 import 'package:ns_file_coordinator_util_example/async_write_route.dart';
@@ -173,7 +172,7 @@ class _MyHomeState extends State<MyHome> {
           dirUrl = list.first.url;
         }
       } else {
-        final res = await _iosPicker.pick(DocumentPickerType.directory);
+        final res = await _iosPicker.pick(IosDocumentPickerType.directory);
         if (res == null) {
           dirUrl = null;
         } else {
