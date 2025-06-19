@@ -1,3 +1,7 @@
+## 0.25.0
+
+- Rename `readFileSync` to `readFileBytes`.
+
 ## 0.24.2
 
 - `readFileSync` now supports optional `start` and `count` parameters.

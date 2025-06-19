@@ -12,7 +12,7 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
   var _session = 0;
 
   @override
-  Future<Uint8List> readFileSync(String srcUrl,
+  Future<Uint8List> readFileBytes(String srcUrl,
       {int? start, int? count}) async {
     if (count != null) {
       if (count <= 0) {
@@ -20,7 +20,7 @@ class MethodChannelNsFileCoordinatorUtil extends NsFileCoordinatorUtilPlatform {
       }
       start ??= 0;
     }
-    final res = await methodChannel.invokeMethod<Uint8List>('readFileSync', {
+    final res = await methodChannel.invokeMethod<Uint8List>('readFileBytes', {
       'src': srcUrl.toString(),
       'start': start,
       'count': count,

@@ -66,7 +66,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
       return
     }
     switch call.method {
-    case "readFileSync":
+    case "readFileBytes":
       guard let url = URL(string: args["src"] as! String) else {
         result(FlutterError(code: "ArgError", message: "Invalid arguments", details: nil))
         return
@@ -79,7 +79,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
           do {
             if start != nil || count != nil {
               return ResultWrapper.createResult(
-                try self.readFileSyncWithOffset(from: url, startIndex: start, count: count))
+                try self.readFileBytesWithOffset(from: url, startIndex: start, count: count))
             }
             let data = try Data(contentsOf: url)
             return ResultWrapper.createResult(data)
@@ -571,7 +571,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
   }
 
   // Call this when either `startInex` or `count` is not nil.
-  private func readFileSyncWithOffset(from fileURL: URL, startIndex: Int?, count: Int?) throws
+  private func readFileBytesWithOffset(from fileURL: URL, startIndex: Int?, count: Int?) throws
     -> Data?
   {
     let fileHandle = try FileHandle(forReadingFrom: fileURL)

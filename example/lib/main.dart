@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:accessing_security_scoped_resource/accessing_security_scoped_resource.dart';
@@ -9,13 +10,11 @@ import 'package:ios_document_picker/ios_document_picker.dart';
 import 'package:ios_document_picker/ios_document_picker_platform_interface.dart';
 import 'package:macos_file_picker/macos_file_picker.dart';
 import 'package:macos_file_picker/macos_file_picker_platform_interface.dart';
-import 'dart:async';
-
 import 'package:ns_file_coordinator_util/ns_file_coordinator_util.dart';
 import 'package:ns_file_coordinator_util_example/async_read_route.dart';
 import 'package:ns_file_coordinator_util_example/async_write_route.dart';
-import 'package:tmp_path/tmp_path.dart';
 import 'package:path/path.dart' as p;
+import 'package:tmp_path/tmp_path.dart';
 
 void main() {
   runApp(const MyApp());
@@ -211,7 +210,7 @@ class _MyHomeState extends State<MyHome> {
       setState(() {
         _output = 'Reading/downloading $dir';
       });
-      final data = await _plugin.readFileSync(fileAbsUrl,
+      final data = await _plugin.readFileBytes(fileAbsUrl,
           start: partial == true ? 3 : null, count: partial == true ? 2 : null);
       setState(() {
         _output = 'File content: ${data.length} bytes';

@@ -13,9 +13,9 @@ class NsFileCoordinatorUtil {
   /// Reads an iCloud [srcUrl] file and return a [Uint8List].
   ///
   /// [start] and [count] are optional parameters to read only a part of the file.
-  Future<Uint8List> readFileSync(String srcUrl, {int? start, int? count}) {
+  Future<Uint8List> readFileBytes(String srcUrl, {int? start, int? count}) {
     return NsFileCoordinatorUtilPlatform.instance
-        .readFileSync(srcUrl, start: start, count: count);
+        .readFileBytes(srcUrl, start: start, count: count);
   }
 
   /// Writes the specified [data] to the iCloud [destUrl] file.
