@@ -135,7 +135,7 @@ class _MyHomeState extends State<MyHome> {
       OutlinedButton(
           onPressed: () => _readSync(partial: true),
           child: const Text('Read file with offset')),
-      OutlinedButton(onPressed: _stat, child: const Text('Get information')),
+      OutlinedButton(onPressed: _stat, child: const Text('Stat')),
       OutlinedButton(
           onPressed: () => _list(recursive: false),
           child: const Text('List contents')),
@@ -196,15 +196,19 @@ class _MyHomeState extends State<MyHome> {
     }
   }
 
+  List<String> _getRelPaths() {
+    return _fileTextController.text.split('/');
+  }
+
   Future<void> _readSync({bool? partial}) async {
     try {
       var dir = _icloudFolder;
-      var fileRelPath = _fileTextController.text;
-      if (fileRelPath.isEmpty || dir == null) {
+      final relPathComps = _getRelPaths();
+      if (relPathComps.isEmpty || dir == null) {
         return;
       }
       var fileAbsUrl =
-          await _darwinUrlPlugin.append(dir, [fileRelPath], isDir: false);
+          await _darwinUrlPlugin.append(dir, relPathComps, isDir: false);
 
       setState(() {
         _output = 'Reading/downloading $dir';
@@ -268,12 +272,12 @@ class _MyHomeState extends State<MyHome> {
   Future<void> _stat() async {
     try {
       var dir = _icloudFolder;
-      var fileRelPath = _fileTextController.text;
-      if (fileRelPath.isEmpty || dir == null) {
+      final relPathComps = _getRelPaths();
+      if (relPathComps.isEmpty || dir == null) {
         return;
       }
       var fileAbsUrl =
-          await _darwinUrlPlugin.append(dir, [fileRelPath], isDir: false);
+          await _darwinUrlPlugin.append(dir, relPathComps, isDir: false);
 
       setState(() {
         _output = 'Getting information of $dir';
@@ -293,12 +297,12 @@ class _MyHomeState extends State<MyHome> {
   Future<void> _delete() async {
     try {
       var dir = _icloudFolder;
-      var fileRelPath = _fileTextController.text;
-      if (fileRelPath.isEmpty || dir == null) {
+      final relPathComps = _getRelPaths();
+      if (relPathComps.isEmpty || dir == null) {
         return;
       }
       var fileAbsUrl =
-          await _darwinUrlPlugin.append(dir, [fileRelPath], isDir: false);
+          await _darwinUrlPlugin.append(dir, relPathComps, isDir: false);
 
       setState(() {
         _output = 'Deleting $dir';
@@ -318,12 +322,12 @@ class _MyHomeState extends State<MyHome> {
   Future<void> _move() async {
     try {
       var dir = _icloudFolder;
-      var fileRelPath = _fileTextController.text;
-      if (fileRelPath.isEmpty || dir == null) {
+      final relPathComps = _getRelPaths();
+      if (relPathComps.isEmpty || dir == null) {
         return;
       }
       var fileAbsUrl =
-          await _darwinUrlPlugin.append(dir, [fileRelPath], isDir: false);
+          await _darwinUrlPlugin.append(dir, relPathComps, isDir: false);
       var newFileAbsUrl =
           await _darwinUrlPlugin.append(dir, ['newName'], isDir: false);
 
@@ -345,12 +349,12 @@ class _MyHomeState extends State<MyHome> {
   Future<void> _copyPath() async {
     try {
       var dir = _icloudFolder;
-      var fileRelPath = _fileTextController.text;
-      if (fileRelPath.isEmpty || dir == null) {
+      final relPathComps = _getRelPaths();
+      if (relPathComps.isEmpty || dir == null) {
         return;
       }
       var fileAbsUrl =
-          await _darwinUrlPlugin.append(dir, [fileRelPath], isDir: false);
+          await _darwinUrlPlugin.append(dir, relPathComps, isDir: false);
       var tmpDir = await _createTempDir();
       var tmpDirUrl = await _darwinUrlPlugin.filePathToUrl(tmpDir);
 
@@ -372,12 +376,12 @@ class _MyHomeState extends State<MyHome> {
   Future<void> _exists() async {
     try {
       var dir = _icloudFolder;
-      var fileRelPath = _fileTextController.text;
-      if (fileRelPath.isEmpty || dir == null) {
+      final relPathComps = _getRelPaths();
+      if (relPathComps.isEmpty || dir == null) {
         return;
       }
       var fileAbsUrl =
-          await _darwinUrlPlugin.append(dir, [fileRelPath], isDir: false);
+          await _darwinUrlPlugin.append(dir, relPathComps, isDir: false);
 
       setState(() {
         _output = 'Checking if $fileAbsUrl exists';
