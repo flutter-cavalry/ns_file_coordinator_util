@@ -1,3 +1,7 @@
+## 0.25.1
+
+- Wrap getting mod time logic in try-catch.
+
 ## 0.25.0
 
 - Rename `readFileSync` to `readFileBytes`.
