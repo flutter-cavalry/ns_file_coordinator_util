@@ -38,7 +38,7 @@ class ResultWrapper<T> {
 
 public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
   static let fsResourceKeys: [URLResourceKey] = [
-    .nameKey, .fileSizeKey, .isDirectoryKey, .contentModificationDateKey,
+    .nameKey, .fileSizeKey, .isDirectoryKey,
   ]
 
   private let binaryMessenger: FlutterBinaryMessenger
@@ -459,7 +459,9 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
     }
   }
 
-  private func handleResultWrapperError<T>(_ res: ResultWrapper<T>?, coordinatorErr: NSError?, context: String)
+  private func handleResultWrapperError<T>(
+    _ res: ResultWrapper<T>?, coordinatorErr: NSError?, context: String
+  )
     -> ResultWrapper<T>
   {
     guard let res = res else {
@@ -534,11 +536,7 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
   private func fsStat(url: URL, relativePath: Bool) throws -> [String: Any?] {
     let fileAttributes = try url.resourceValues(
       forKeys: Set(NsFileCoordinatorUtilPlugin.fsResourceKeys))
-    let lastModRaw = fileAttributes.contentModificationDate
-    var lastMod: Int? = nil
-    if let lastModRaw = lastModRaw {
-      lastMod = Int(lastModRaw.timeIntervalSince1970)
-    }
+
     let isDir = fileAttributes.isDirectory ?? false
     var urlString = url.absoluteString
     // Make sure directory URLs always end with a trailing /
@@ -552,12 +550,27 @@ public class NsFileCoordinatorUtilPlugin: NSObject, FlutterPlugin {
       // Make sure `size` always has a value to ease parsing code on dart.
       "length": fileAttributes.fileSize ?? 0,
       "isDir": isDir,
-      "lastMod": lastMod,
     ]
+
+    if let lastModDate = getFileLastModOrNull(url: url) {
+      let lastModInt = Int(lastModDate.timeIntervalSince1970)
+      stat["lastMod"] = lastModInt
+    }
+
     if relativePath && !url.relativePath.isEmpty {
       stat["relativePath"] = url.relativePath
     }
     return stat
+  }
+
+  private func getFileLastModOrNull(url: URL) -> Date? {
+    do {
+      let values = try url.resourceValues(forKeys: [.contentModificationDateKey])
+      return values.contentModificationDate
+    } catch {
+      print("Error retrieving modification date for \(url): \(error.localizedDescription)")
+      return nil
+    }
   }
 
   private func urlAndRelativePath(url: URL) throws -> [String: Any?] {
